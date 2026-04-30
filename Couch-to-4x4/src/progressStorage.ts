@@ -156,12 +156,14 @@ function isSessionHistoryEntry(value: unknown): value is SessionHistoryEntry {
     return false;
   }
 
-  const entry = value as SessionHistoryEntry;
+  const entry = value as Record<string, unknown>;
 
   return (
     typeof entry.id === "string" &&
     typeof entry.timestamp === "string" &&
+    typeof entry.week === "number" &&
     Number.isFinite(entry.week) &&
+    typeof entry.sessionNumber === "number" &&
     Number.isFinite(entry.sessionNumber) &&
     (entry.rating === "too-hard" || entry.rating === "progress")
   );

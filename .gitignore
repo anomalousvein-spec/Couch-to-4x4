@@ -2,12 +2,19 @@
 # Dependencies
 node_modules/
 
-# Environment variables
+# Environment
 .env
 .env.local
 .env.*
 
-# Build outputs
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Build artifacts
 dist/
 build/
 target/
@@ -22,32 +29,23 @@ env/
 venv/
 .venv/
 .ENV
-.python-version
-.pytest_cache/
-.mypy_cache/
 
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Editor files
+# Editor
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# Coverage reports
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
 coverage/
 htmlcov/
+.pytest_cache/
+.mypy_cache/
 
 # Compressed files
 *.zip

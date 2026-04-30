@@ -1,0 +1,4 @@
+[build]
+  base = "Couch-to-4x4"
+  publish = "dist"
+  command = "npm run build"

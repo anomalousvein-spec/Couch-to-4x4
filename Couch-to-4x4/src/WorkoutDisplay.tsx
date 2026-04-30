@@ -30,11 +30,10 @@ export function WorkoutDisplay({
     handlePause,
     handleReset,
     handleSkipPhase,
-    completionHandledRef,
-    workoutStartedRef,
+    setCompletionHandled,
+    setWorkoutStarted,
     clearWarning,
     releaseWakeLock,
-    suppressNextPhaseCueRef,
   } = useWorkout(config);
 
   if (!state) return null;
@@ -42,10 +41,9 @@ export function WorkoutDisplay({
   const handleSuccessCheck = (result: "too-hard" | "progress"): void => {
     void AudioManager.unlock();
     onSuccessCheck?.(result);
-    suppressNextPhaseCueRef.current = true;
     handleReset();
-    completionHandledRef.current = false;
-    workoutStartedRef.current = false;
+    setCompletionHandled(false);
+    setWorkoutStarted(false);
     setShowSuccessCheck(false);
     clearWarning();
     void releaseWakeLock();

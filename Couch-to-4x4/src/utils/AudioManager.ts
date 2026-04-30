@@ -11,6 +11,7 @@ class AudioManagerImpl {
   private bufferCache = new Map<string, Promise<AudioBuffer>>();
   private activeCueCount = 0;
   private visibilityListenerAttached = false;
+  private visibilityHandler: (() => void) | null = null;
 
   public async unlock(): Promise<void> {
     const context = this.getContext();
@@ -68,6 +69,30 @@ class AudioManagerImpl {
     }
 
     await this.context.resume().catch(() => undefined);
+  }
+
+  /**
+   * Cleans up the audio manager by removing event listeners and releasing resources.
+   * Call this when the audio manager is no longer needed to prevent memory leaks.
+   */
+  public cleanup(): void {
+    if (this.visibilityListenerAttached && this.visibilityHandler) {
+      document.removeEventListener("visibilitychange", this.visibilityHandler);
+      this.visibilityListenerAttached = false;
+      this.visibilityHandler = null;
+    }
+    
+    if (this.cueGain) {
+      this.cueGain.disconnect();
+      this.cueGain = null;
+    }
+    
+    if (this.context) {
+      this.context.close().catch(() => undefined);
+      this.context = null;
+    }
+    
+    this.bufferCache.clear();
   }
 
   private getContext(): AudioContext {
@@ -163,11 +188,13 @@ class AudioManagerImpl {
       return;
     }
 
-    document.addEventListener("visibilitychange", () => {
+    this.visibilityHandler = () => {
       if (document.visibilityState === "visible") {
         void this.resumeIfSuspended();
       }
-    });
+    };
+
+    document.addEventListener("visibilitychange", this.visibilityHandler);
     this.visibilityListenerAttached = true;
   }
 }

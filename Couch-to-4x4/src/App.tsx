@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   getCurrentGoalLabel,
   getWorkoutConfig,
@@ -13,7 +13,7 @@ import {
   saveWorkoutProgress,
   SESSIONS_PER_WEEK,
 } from "./progressStorage";
-import type { EffortRating, SessionHistoryEntry, WorkoutProgress } from "./progressStorage";
+import type { EffortRating, SessionHistoryEntry } from "./progressStorage";
 import WorkoutDisplay from "./WorkoutDisplay";
 
 type AppView = "workout" | "settings";
@@ -27,7 +27,7 @@ export function App() {
   const [progress, setProgress] = useState(() => loadWorkoutProgress());
   const [history, setHistory] = useState<SessionHistoryEntry[]>(() => loadSessionHistory());
   const [view, setView] = useState<AppView>("workout");
-  const progressRef = useRef<WorkoutProgress>(progress);
+
   const currentWeek = progress.currentWeek;
   const config = useMemo(
     () => (currentWeek === null ? null : getWorkoutConfig(currentWeek)),
@@ -38,10 +38,6 @@ export function App() {
     [currentWeek]
   );
 
-  useEffect(() => {
-    progressRef.current = progress;
-  }, [progress]);
-
   const handleSelectWeek = useCallback((week: number): void => {
     const nextProgress = {
       currentWeek: week,
@@ -49,24 +45,21 @@ export function App() {
     };
 
     saveWorkoutProgress(nextProgress);
-    progressRef.current = nextProgress;
     setProgress(nextProgress);
     setView("workout");
   }, []);
 
   const handleSuccessCheck = useCallback((result: EffortRating): void => {
-    const previousProgress = progressRef.current;
-
-    if (previousProgress.currentWeek === null) {
+    if (progress.currentWeek === null) {
       return;
     }
 
     const sessionNumber = Math.min(
       SESSIONS_PER_WEEK,
-      previousProgress.sessionCount + 1
+      progress.sessionCount + 1
     );
     const loggedSession = logSession(
-      previousProgress.currentWeek,
+      progress.currentWeek,
       result,
       sessionNumber
     );
@@ -79,21 +72,20 @@ export function App() {
       return;
     }
 
-    const nextSessionCount = previousProgress.sessionCount + 1;
+    const nextSessionCount = progress.sessionCount + 1;
     const shouldAdvanceWeek = nextSessionCount >= SESSIONS_PER_WEEK;
-    const currentWeek = shouldAdvanceWeek
-      ? Math.min(previousProgress.currentWeek + 1, MAX_PROGRAM_WEEK)
-      : previousProgress.currentWeek;
-    const sessionCount = shouldAdvanceWeek ? 0 : nextSessionCount;
+    const newCurrentWeek = shouldAdvanceWeek
+      ? Math.min(progress.currentWeek + 1, MAX_PROGRAM_WEEK)
+      : progress.currentWeek;
+    const newSessionCount = shouldAdvanceWeek ? 0 : nextSessionCount;
     const nextProgress = {
-      currentWeek,
-      sessionCount,
+      currentWeek: newCurrentWeek,
+      sessionCount: newSessionCount,
     };
 
     saveWorkoutProgress(nextProgress);
-    progressRef.current = nextProgress;
     setProgress(nextProgress);
-  }, []);
+  }, [progress]);
 
   if (currentWeek === null || config === null || currentGoal === null) {
     return <Onboarding onSelectWeek={handleSelectWeek} />;

@@ -82,7 +82,6 @@ export function useWorkout(config: WorkoutConfig) {
     completionHandledRef,
     workoutStartedRef,
     suppressNextPhaseCueRef,
-    setSilentAudioActive: (_val: boolean) => {}, // Placeholder for legacy compatibility
     clearWarning: () => setIsWarningActive(false),
     releaseWakeLock
   };

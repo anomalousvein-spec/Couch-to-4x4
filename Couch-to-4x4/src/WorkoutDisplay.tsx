@@ -2,6 +2,9 @@ import { WorkoutPhase, type WorkoutConfig } from "./workoutEngine";
 import { useWorkout } from "./hooks/useWorkout";
 import { AudioManager } from "./utils/AudioManager";
 
+// Circle circumference for r=45: 2 * π * 45 ≈ 282.74
+const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 45;
+
 interface WorkoutDisplayProps {
   config: WorkoutConfig;
   currentWeek?: number;
@@ -29,7 +32,6 @@ export function WorkoutDisplay({
     handleSkipPhase,
     completionHandledRef,
     workoutStartedRef,
-    setSilentAudioActive,
     clearWarning,
     releaseWakeLock,
     suppressNextPhaseCueRef,
@@ -45,7 +47,6 @@ export function WorkoutDisplay({
     completionHandledRef.current = false;
     workoutStartedRef.current = false;
     setShowSuccessCheck(false);
-    setSilentAudioActive(false);
     clearWarning();
     void releaseWakeLock();
   };
@@ -117,7 +118,7 @@ export function WorkoutDisplay({
             cx="50"
             cy="50"
             r="45"
-            style={{ strokeDashoffset: `${282.7 - (282.7 * phaseProgress) / 100}` }}
+            style={{ strokeDashoffset: `${CIRCLE_CIRCUMFERENCE - (CIRCLE_CIRCUMFERENCE * phaseProgress) / 100}` }}
           />
         </svg>
         <div

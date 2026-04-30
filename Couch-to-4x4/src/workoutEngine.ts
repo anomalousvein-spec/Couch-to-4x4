@@ -24,27 +24,12 @@ export interface WorkoutConfig {
   cooldownSeconds: number;
 }
 
-export const LEVELS: (WorkoutConfig & { week: number })[] = [
-  { week: 1, intervals: 2, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 2, intervals: 2, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 3, intervals: 3, workSeconds: 45, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 4, intervals: 3, workSeconds: 45, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 5, intervals: 4, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 6, intervals: 4, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 7, intervals: 4, workSeconds: 60, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 8, intervals: 4, workSeconds: 60, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 9, intervals: 4, workSeconds: 120, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 10, intervals: 4, workSeconds: 120, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 11, intervals: 4, workSeconds: 180, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-  { week: 12, intervals: 4, workSeconds: 240, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
-];
-
 class WorkoutEngine {
   private status: Status = 'idle';
   private phase: WorkoutPhase = WorkoutPhase.WARMUP;
   private currentInterval: number = 0;
   private secondsRemaining: number = 300;
-  private config: WorkoutConfig = LEVELS[0];
+  private config: WorkoutConfig = { intervals: 2, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 };
   private timer: number | null = null;
   private listeners: ((state: WorkoutState) => void)[] = [];
 

@@ -122,11 +122,11 @@ export function App() {
         className="industrial-card goal-card"
       >
         Current Goal: {currentGoal}
-        <div style={{ fontSize: "0.9rem", fontWeight: 700, marginTop: "0.25rem" }}>
+        <div className="goal-card-text">
           Progress: {progress.sessionCount}/{SESSIONS_PER_WEEK} sessions to level up
         </div>
         {lastSession ? (
-          <div style={{ fontSize: "0.9rem", fontWeight: 600, marginTop: "0.25rem" }}>
+          <div className="last-session-text">
             Last session: Week {lastSession.week}, Day {lastSession.sessionNumber} - {ratingLabel[lastSession.rating]}
           </div>
         ) : null}

@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { getAllWeekSummaries } from "../configMapper";
-import type { SessionHistoryEntry } from "../progressStorage";
+import {
+  type SessionHistoryEntry,
+} from "../progressStorage";
 
 interface SettingsProps {
   currentWeek: number;
@@ -39,14 +41,10 @@ export function Settings({ currentWeek, history, onSelectWeek }: SettingsProps) 
   return (
     <main className="settings-screen">
       <section className="settings-layout">
-        <div>
-          <h1 style={{ fontSize: "2rem", margin: "0 0 0.5rem" }}>
-            Level Selector
-          </h1>
-          <p style={{ margin: 0 }}>
-            Current week: {currentWeek}
-          </p>
-        </div>
+        <header className="settings-header">
+          <h1 className="settings-title">Level Selector</h1>
+          <p className="current-week-text">Current week: {currentWeek}</p>
+        </header>
 
         <section
           aria-label="Program weeks"
@@ -70,22 +68,19 @@ export function Settings({ currentWeek, history, onSelectWeek }: SettingsProps) 
 
         <section
           aria-label="Session history"
-          className="industrial-card"
-          style={{ padding: "1rem" }}
+          className="industrial-card history-card"
         >
-          <h2 style={{ fontSize: "1.25rem", margin: "0 0 0.75rem" }}>
-            Recent Workouts
-          </h2>
+          <h2 className="history-title">Recent Workouts</h2>
           {recentHistory.length > 0 ? (
             <ul className="history-list">
               {recentHistory.map((entry) => (
-                <li key={entry.id}>
+                <li key={entry.id} className="history-item">
                   {formatHistoryEntry(entry)}
                 </li>
               ))}
             </ul>
           ) : (
-            <p style={{ margin: 0 }}>No sessions logged yet.</p>
+            <p className="no-history-text">No sessions logged yet.</p>
           )}
         </section>
       </section>
@@ -97,16 +92,14 @@ export function Settings({ currentWeek, history, onSelectWeek }: SettingsProps) 
           className="settings-modal"
         >
           <div className="settings-dialog industrial-card">
-            <h2 style={{ fontSize: "1.4rem", margin: 0 }}>
-              Skip ahead to week {pendingWeek}?
-            </h2>
-            <p style={{ margin: 0 }}>
+            <h2 className="modal-title">Skip ahead to week {pendingWeek}?</h2>
+            <p className="modal-text">
               This protocol is designed around cardiorespiratory recovery. Jumping ahead too quickly can make the next intervals harder to recover from.
             </p>
-            <button onClick={confirmPendingWeek} type="button">
+            <button className="confirm-btn" onClick={confirmPendingWeek} type="button">
               Confirm week {pendingWeek}
             </button>
-            <button onClick={() => setPendingWeek(null)} type="button">
+            <button className="cancel-btn" onClick={() => setPendingWeek(null)} type="button">
               Stay on week {currentWeek}
             </button>
           </div>

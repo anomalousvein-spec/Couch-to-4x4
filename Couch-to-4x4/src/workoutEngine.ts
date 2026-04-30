@@ -3,292 +3,181 @@ export enum WorkoutPhase {
   WORK = "WORK",
   REST = "REST",
   COOLDOWN = "COOLDOWN",
-  COMPLETE = "COMPLETE",
+}
+
+export type Status = 'idle' | 'running' | 'paused' | 'completed';
+
+export interface WorkoutState {
+  status: Status;
+  phase: WorkoutPhase;
+  currentInterval: number;
+  totalIntervals: number;
+  secondsRemaining: number;
 }
 
 export interface WorkoutConfig {
-  warmupSeconds: number;
+  week?: number;
+  intervals: number;
   workSeconds: number;
   restSeconds: number;
+  warmupSeconds: number;
   cooldownSeconds: number;
-  intervals: number;
 }
 
-export interface WorkoutState {
-  phase: WorkoutPhase;
-  secondsRemaining: number;
-  currentInterval: number;
-  totalIntervals: number;
-  active: boolean;
-}
+export const LEVELS: (WorkoutConfig & { week: number })[] = [
+  { week: 1, intervals: 2, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 2, intervals: 2, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 3, intervals: 3, workSeconds: 45, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 4, intervals: 3, workSeconds: 45, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 5, intervals: 4, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 6, intervals: 4, workSeconds: 30, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 7, intervals: 4, workSeconds: 60, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 8, intervals: 4, workSeconds: 60, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 9, intervals: 4, workSeconds: 120, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 10, intervals: 4, workSeconds: 120, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 11, intervals: 4, workSeconds: 180, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+  { week: 12, intervals: 4, workSeconds: 240, restSeconds: 180, warmupSeconds: 300, cooldownSeconds: 300 },
+];
 
-export interface WorkoutEngineCallbacks {
-  onTick?: (state: WorkoutState) => void;
-  onPhaseChange?: (phase: WorkoutPhase, state: WorkoutState) => void;
-  onWarning?: (secondsToNextPhase: number) => void;
-}
+class WorkoutEngine {
+  private status: Status = 'idle';
+  private phase: WorkoutPhase = WorkoutPhase.WARMUP;
+  private currentInterval: number = 0;
+  private secondsRemaining: number = 300;
+  private config: WorkoutConfig = LEVELS[0];
+  private timer: number | null = null;
+  private listeners: ((state: WorkoutState) => void)[] = [];
 
-type TimeoutHandle = ReturnType<typeof setTimeout>;
-
-const TICK_MS = 100;
-const SECOND_MS = 1000;
-
-export class WorkoutEngine {
-  private config: WorkoutConfig;
-  private callbacks: WorkoutEngineCallbacks;
-  private state: WorkoutState;
-  private phaseStartedAtMs = 0;
-  private pausedElapsedMs = 0;
-  private warningTriggeredForPhase = false;
-  private timeoutId: TimeoutHandle | null = null;
-
-  constructor(config: WorkoutConfig, callbacks: WorkoutEngineCallbacks = {}) {
-    this.config = this.normalizeConfig(config);
-    this.callbacks = callbacks;
-    this.state = this.createInitialState();
+  getState(): WorkoutState {
+    return {
+      status: this.status,
+      phase: this.phase,
+      currentInterval: this.currentInterval,
+      totalIntervals: this.config.intervals,
+      secondsRemaining: this.secondsRemaining,
+    };
   }
 
-  public getState(): WorkoutState {
-    return { ...this.state };
-  }
-
-  public setCallbacks(callbacks: WorkoutEngineCallbacks): void {
-    this.callbacks = callbacks;
-  }
-
-  public updateConfig(config: WorkoutConfig): void {
-    this.config = this.normalizeConfig(config);
+  setConfig(config: WorkoutConfig) {
+    this.config = config;
     this.reset();
   }
 
-  public start(): void {
-    if (this.state.active || this.state.phase === WorkoutPhase.COMPLETE) {
-      return;
-    }
-
-    this.state = { ...this.state, active: true };
-    this.phaseStartedAtMs = Date.now() - this.pausedElapsedMs;
-    this.emitTick();
-    this.scheduleTick();
+  start() {
+    if (this.status === 'running') return;
+    this.status = 'running';
+    if (this.timer) clearInterval(this.timer);
+    this.timer = window.setInterval(() => this.tick(), 1000);
+    this.notify();
   }
 
-  public pause(): void {
-    if (!this.state.active) {
-      return;
-    }
-
-    this.pausedElapsedMs = Date.now() - this.phaseStartedAtMs;
-    this.state = { ...this.state, active: false };
-    this.cancelTick();
-    this.emitTick();
+  pause() {
+    if (this.status !== 'running') return;
+    this.status = 'paused';
+    if (this.timer) clearInterval(this.timer);
+    this.notify();
   }
 
-  public reset(config?: WorkoutConfig): void {
-    this.cancelTick();
-
-    if (config) {
-      this.config = this.normalizeConfig(config);
-    }
-
-    this.phaseStartedAtMs = 0;
-    this.pausedElapsedMs = 0;
-    this.warningTriggeredForPhase = false;
-    this.state = this.createInitialState();
-    this.emitPhaseChange();
-    this.emitTick();
+  reset() {
+    if (this.timer) clearInterval(this.timer);
+    this.status = 'idle';
+    this.phase = WorkoutPhase.WARMUP;
+    this.currentInterval = 0;
+    this.secondsRemaining = this.config.warmupSeconds;
+    this.timer = null;
+    this.notify();
   }
 
-  private tick = (): void => {
-    if (!this.state.active) {
-      return;
-    }
-
-    this.advanceToCurrentPhase(Date.now());
-    this.emitTick();
-
-    if (this.state.active) {
-      this.scheduleTick();
-    }
-  };
-
-  private advanceToCurrentPhase(nowMs: number): void {
-    let elapsedMs = nowMs - this.phaseStartedAtMs;
-    let durationMs = this.getPhaseDurationSeconds(this.state.phase) * SECOND_MS;
-
-    while (durationMs > 0 && elapsedMs >= durationMs && this.state.phase !== WorkoutPhase.COMPLETE) {
-      const overflowMs = elapsedMs - durationMs;
-      this.transitionToNextPhase(nowMs - overflowMs);
-      elapsedMs = nowMs - this.phaseStartedAtMs;
-      durationMs = this.getPhaseDurationSeconds(this.state.phase) * SECOND_MS;
-    }
-
-    if (durationMs === 0 && this.state.phase !== WorkoutPhase.COMPLETE) {
-      this.transitionThroughZeroLengthPhases(nowMs);
-      elapsedMs = nowMs - this.phaseStartedAtMs;
-      durationMs = this.getPhaseDurationSeconds(this.state.phase) * SECOND_MS;
-    }
-
-    const remainingMs = Math.max(0, durationMs - elapsedMs);
-    this.state = {
-      ...this.state,
-      secondsRemaining: Math.ceil(remainingMs / SECOND_MS),
-    };
-    this.emitWarningIfNeeded();
-  }
-
-  private transitionThroughZeroLengthPhases(nowMs: number): void {
-    let guard = 0;
-
-    while (
-      this.state.phase !== WorkoutPhase.COMPLETE &&
-      this.getPhaseDurationSeconds(this.state.phase) === 0 &&
-      guard < this.config.intervals + 4
-    ) {
-      this.transitionToNextPhase(nowMs);
-      guard += 1;
+  skipPhase() {
+    if (this.status !== 'idle') {
+      this.secondsRemaining = 0;
+      this.tick();
     }
   }
 
-  private transitionToNextPhase(startedAtMs: number): void {
-    const nextState = this.getNextState();
+  private tick() {
+    if (this.secondsRemaining > 0) {
+      this.secondsRemaining--;
+    } else {
+      this.nextPhase();
+    }
+    this.notify();
+  }
 
-    this.phaseStartedAtMs = startedAtMs;
-    this.pausedElapsedMs = 0;
-    this.warningTriggeredForPhase = false;
-    this.state = {
-      ...nextState,
-      active: nextState.phase !== WorkoutPhase.COMPLETE,
-      secondsRemaining: this.getPhaseDurationSeconds(nextState.phase),
-    };
-
-    this.emitPhaseChange();
-
-    if (this.state.phase === WorkoutPhase.COMPLETE) {
-      this.cancelTick();
+  private nextPhase() {
+    if (this.phase === WorkoutPhase.WARMUP) {
+      this.phase = WorkoutPhase.WORK;
+      this.currentInterval = 1;
+      this.secondsRemaining = this.config.workSeconds;
+    } else if (this.phase === WorkoutPhase.WORK) {
+      this.phase = WorkoutPhase.REST;
+      this.secondsRemaining = this.config.restSeconds;
+    } else if (this.phase === WorkoutPhase.REST) {
+      if (this.currentInterval < this.config.intervals) {
+        this.phase = WorkoutPhase.WORK;
+        this.currentInterval++;
+        this.secondsRemaining = this.config.workSeconds;
+      } else {
+        this.phase = WorkoutPhase.COOLDOWN;
+        this.secondsRemaining = this.config.cooldownSeconds;
+      }
+    } else if (this.phase === WorkoutPhase.COOLDOWN) {
+      this.status = 'completed';
+      if (this.timer) clearInterval(this.timer);
     }
   }
 
-  private getNextState(): WorkoutState {
-    switch (this.state.phase) {
-      case WorkoutPhase.WARMUP:
-        return {
-          ...this.state,
-          phase: WorkoutPhase.WORK,
-          currentInterval: 1,
-        };
-      case WorkoutPhase.WORK:
-        return {
-          ...this.state,
-          phase: WorkoutPhase.REST,
-        };
-      case WorkoutPhase.REST:
-        if (this.state.currentInterval >= this.config.intervals) {
-          return {
-            ...this.state,
-            phase: WorkoutPhase.COOLDOWN,
-          };
+  getTotalDurationSeconds(): number {
+    return this.config.warmupSeconds +
+           (this.config.intervals * (this.config.workSeconds + this.config.restSeconds)) +
+           this.config.cooldownSeconds;
+  }
+
+  getElapsedSeconds(): number {
+    let elapsed = 0;
+
+    if (this.phase === WorkoutPhase.WARMUP) {
+      elapsed += this.config.warmupSeconds - this.secondsRemaining;
+    } else {
+      elapsed += this.config.warmupSeconds;
+
+      if (this.phase === WorkoutPhase.WORK || this.phase === WorkoutPhase.REST) {
+        const fullIntervals = this.currentInterval - 1;
+        elapsed += fullIntervals * (this.config.workSeconds + this.config.restSeconds);
+
+        if (this.phase === WorkoutPhase.WORK) {
+          elapsed += this.config.workSeconds - this.secondsRemaining;
+        } else {
+          elapsed += this.config.workSeconds + (this.config.restSeconds - this.secondsRemaining);
         }
+      } else if (this.phase === WorkoutPhase.COOLDOWN) {
+        elapsed += (this.config.intervals * (this.config.workSeconds + this.config.restSeconds)) + (this.config.cooldownSeconds - this.secondsRemaining);
+      }
+    }
+    return elapsed;
+  }
 
-        return {
-          ...this.state,
-          phase: WorkoutPhase.WORK,
-          currentInterval: this.state.currentInterval + 1,
-        };
-      case WorkoutPhase.COOLDOWN:
-      case WorkoutPhase.COMPLETE:
-        return {
-          ...this.state,
-          phase: WorkoutPhase.COMPLETE,
-        };
-      default:
-        return this.createInitialState();
+  getPhaseDurationSeconds(): number {
+    switch (this.phase) {
+      case WorkoutPhase.WARMUP: return this.config.warmupSeconds;
+      case WorkoutPhase.WORK: return this.config.workSeconds;
+      case WorkoutPhase.REST: return this.config.restSeconds;
+      case WorkoutPhase.COOLDOWN: return this.config.cooldownSeconds;
+      default: return 0;
     }
   }
 
-  private getPhaseDurationSeconds(phase: WorkoutPhase): number {
-    switch (phase) {
-      case WorkoutPhase.WARMUP:
-        return this.config.warmupSeconds;
-      case WorkoutPhase.WORK:
-        return this.config.workSeconds;
-      case WorkoutPhase.REST:
-        return this.config.restSeconds;
-      case WorkoutPhase.COOLDOWN:
-        return this.config.cooldownSeconds;
-      case WorkoutPhase.COMPLETE:
-        return 0;
-      default:
-        return 0;
-    }
-  }
-
-  private scheduleTick(): void {
-    this.cancelTick();
-    this.timeoutId = setTimeout(this.tick, TICK_MS);
-  }
-
-  private cancelTick(): void {
-    if (this.timeoutId !== null) {
-      clearTimeout(this.timeoutId);
-    }
-
-    this.timeoutId = null;
-  }
-
-  private emitTick(): void {
-    this.callbacks.onTick?.(this.getState());
-  }
-
-  private emitPhaseChange(): void {
-    this.callbacks.onPhaseChange?.(this.state.phase, this.getState());
-  }
-
-  private emitWarningIfNeeded(): void {
-    if (
-      this.state.phase !== WorkoutPhase.REST ||
-      this.state.secondsRemaining !== 10 ||
-      this.warningTriggeredForPhase
-    ) {
-      return;
-    }
-
-    this.warningTriggeredForPhase = true;
-    this.callbacks.onWarning?.(10);
-  }
-
-  private createInitialState(): WorkoutState {
-    return {
-      phase: WorkoutPhase.WARMUP,
-      secondsRemaining: this.config.warmupSeconds,
-      currentInterval: 0,
-      totalIntervals: this.config.intervals,
-      active: false,
+  subscribe(listener: (state: WorkoutState) => void) {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener);
     };
   }
 
-  private normalizeConfig(config: WorkoutConfig): WorkoutConfig {
-    return {
-      warmupSeconds: this.normalizeSeconds(config.warmupSeconds, "warmupSeconds"),
-      workSeconds: this.normalizeSeconds(config.workSeconds, "workSeconds"),
-      restSeconds: this.normalizeSeconds(config.restSeconds, "restSeconds"),
-      cooldownSeconds: this.normalizeSeconds(config.cooldownSeconds, "cooldownSeconds"),
-      intervals: this.normalizeIntervals(config.intervals),
-    };
-  }
-
-  private normalizeSeconds(value: number, fieldName: keyof Omit<WorkoutConfig, "intervals">): number {
-    if (!Number.isFinite(value) || value < 0) {
-      throw new Error(`${fieldName} must be a non-negative number.`);
-    }
-
-    return Math.floor(value);
-  }
-
-  private normalizeIntervals(value: number): number {
-    if (!Number.isFinite(value) || value < 1) {
-      throw new Error("intervals must be at least 1.");
-    }
-
-    return Math.floor(value);
+  private notify() {
+    const state = this.getState();
+    this.listeners.forEach(l => l(state));
   }
 }
+
+export const workoutEngine = new WorkoutEngine();

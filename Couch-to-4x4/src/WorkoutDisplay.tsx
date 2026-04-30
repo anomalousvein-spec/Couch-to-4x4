@@ -12,6 +12,12 @@ interface WorkoutDisplayProps {
   sessionCount?: number;
 }
 
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
 export function WorkoutDisplay({
   config,
   currentWeek,
@@ -59,7 +65,7 @@ export function WorkoutDisplay({
     "workout-display",
     phaseClass,
     isWarningActive ? "phase-warning" : "",
-    isGlitching ? "glitching" : "",
+    isGlitching ? "glitching phase-change-flash" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -101,6 +107,7 @@ export function WorkoutDisplay({
         ) : null}
         <p className="phase-label">{state.phase}</p>
         <p className="interval-label">{intervalLabel}</p>
+        <p className="total-remaining-label">Total remaining: {formatTime(totalDuration - elapsedSeconds)}</p>
       </section>
 
       <div className="timer-container">
@@ -120,10 +127,13 @@ export function WorkoutDisplay({
           />
         </svg>
         <div
-          aria-label={`${state.secondsRemaining} seconds remaining`}
+          aria-label={`${state.secondsRemaining} seconds remaining in ${state.phase} phase`}
           className="timer-text"
         >
           {state.secondsRemaining}
+          <div className="phase-duration-readout">
+            {state.secondsRemaining} / {phaseDuration}s
+          </div>
         </div>
       </div>
 
@@ -134,16 +144,19 @@ export function WorkoutDisplay({
       ) : null}
 
       <section aria-label="Workout controls" className="controls-container">
-        <button className="control-btn" onClick={handleStart} type="button">
-          Start
-        </button>
-        <button className="control-btn" onClick={handlePause} type="button">
-          Pause
-        </button>
-        <button className="control-btn" onClick={handleReset} type="button">
+        {state.status === 'running' ? (
+          <button className="control-btn primary-btn" onClick={handlePause} type="button">
+            Pause
+          </button>
+        ) : (
+          <button className="control-btn primary-btn" onClick={handleStart} type="button">
+            {state.status === 'idle' ? 'Start' : 'Resume'}
+          </button>
+        )}
+        <button className="control-btn secondary-btn" onClick={handleReset} type="button">
           Reset
         </button>
-        <button className="control-btn skip-btn" onClick={handleSkipPhase} type="button">
+        <button className="control-btn secondary-btn skip-btn" onClick={handleSkipPhase} type="button">
           Skip
         </button>
       </section>

@@ -49,6 +49,13 @@ export function App() {
     setView("workout");
   }, []);
 
+  const handleResetAll = useCallback((): void => {
+    localStorage.clear();
+    setProgress({ currentWeek: null, sessionCount: 0 });
+    setHistory([]);
+    setView("workout");
+  }, []);
+
   const handleSuccessCheck = useCallback((result: EffortRating): void => {
     if (progress.currentWeek === null) {
       return;
@@ -95,20 +102,6 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <nav aria-label="Primary" className="app-nav">
-        <button
-          onClick={() => setView("workout")}
-          type="button"
-        >
-          Workout
-        </button>
-        <button
-          onClick={() => setView("settings")}
-          type="button"
-        >
-          Settings
-        </button>
-      </nav>
       <aside
         aria-label="Current goal"
         className="industrial-card goal-card"
@@ -123,6 +116,7 @@ export function App() {
           </div>
         ) : null}
       </aside>
+
       {view === "workout" ? (
         <WorkoutDisplay
           config={config}
@@ -135,8 +129,26 @@ export function App() {
           currentWeek={currentWeek}
           history={history}
           onSelectWeek={handleSelectWeek}
+          onResetAll={handleResetAll}
         />
       )}
+
+      <nav aria-label="Primary" className="app-nav bottom-nav">
+        <button
+          onClick={() => setView("workout")}
+          type="button"
+          className={view === "workout" ? "active-nav-btn" : "nav-btn"}
+        >
+          Workout
+        </button>
+        <button
+          onClick={() => setView("settings")}
+          type="button"
+          className={view === "settings" ? "active-nav-btn" : "nav-btn"}
+        >
+          Settings
+        </button>
+      </nav>
     </div>
   );
 }

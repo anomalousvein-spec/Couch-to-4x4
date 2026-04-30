@@ -12,6 +12,19 @@ class AudioManagerImpl {
   private activeCueCount = 0;
   private visibilityListenerAttached = false;
   private visibilityHandler: (() => void) | null = null;
+  private volume: number = parseFloat(localStorage.getItem("couchTo4x4.volume") ?? "1.0");
+
+  public setVolume(value: number): void {
+    this.volume = Math.max(0, Math.min(1, value));
+    localStorage.setItem("couchTo4x4.volume", String(this.volume));
+    if (this.cueGain) {
+      this.cueGain.gain.setTargetAtTime(this.volume, this.getContext().currentTime, 0.1);
+    }
+  }
+
+  public getVolume(): number {
+    return this.volume;
+  }
 
   public async unlock(): Promise<void> {
     const context = this.getContext();
@@ -118,7 +131,7 @@ class AudioManagerImpl {
 
     const context = this.getContext();
     this.cueGain = context.createGain();
-    this.cueGain.gain.value = 1;
+    this.cueGain.gain.value = this.volume;
     this.cueGain.connect(context.destination);
     return this.cueGain;
   }

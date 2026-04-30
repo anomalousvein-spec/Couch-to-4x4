@@ -152,7 +152,7 @@ button:focus-visible {
 .timer-text {
   color: var(--text-bright);
   font-family: "Share Tech Mono", "Courier New", monospace;
-  font-size: clamp(6rem, 24vw, 14rem);
+  font-size: clamp(4.5rem, 18vw, 10.5rem);
   font-variant-numeric: tabular-nums;
   font-weight: 900;
   line-height: 1;

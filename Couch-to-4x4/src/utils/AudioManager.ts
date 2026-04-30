@@ -175,7 +175,7 @@ class AudioManagerImpl {
         title: "Workout cue",
         artist: "Couch to 4x4",
         album: "Norwegian 4x4 HIIT",
-      });
+      }) as unknown as MediaMetadata;
     }
   }
 

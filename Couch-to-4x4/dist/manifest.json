@@ -1,0 +1,19 @@
+{
+  "name": "Couch to 4x4",
+  "short_name": "Couch 4x4",
+  "description": "Guided HIIT training based on the Norwegian 4x4 protocol.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#050505",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

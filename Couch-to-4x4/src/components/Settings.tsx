@@ -30,8 +30,8 @@ function RoadMap({ currentWeek }: { currentWeek: number }) {
   const currentPhaseIndex = phaseOrder.indexOf(currentPhase);
 
   return (
-    <div className="road-map-container industrial-card" style={{ padding: '1.5rem' }}>
-      <h2 className="hud-label" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>ROAD TO 4x4</h2>
+    <div className="road-map-container industrial-card industrial-card-padded">
+      <h2 className="hud-label road-map-title">ROAD TO 4x4</h2>
       <div className="road-map-track">
         {phases.map((phase, index) => {
           const isActive = phase.key === currentPhase;
@@ -45,7 +45,7 @@ function RoadMap({ currentWeek }: { currentWeek: number }) {
               <div className="node-dot">
                 {isCompleted ? "✓" : index + 1}
               </div>
-              <span className="node-label" style={{ fontSize: '0.6rem', marginTop: '0.5rem' }}>{phase.name}</span>
+              <span className="node-label node-label-refinement">{phase.name}</span>
             </div>
           );
         })}
@@ -90,12 +90,12 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
       <section className="settings-layout">
         <header className="settings-header">
           <h1 className="settings-title">CONTROL CENTER</h1>
-          <p className="hud-label" style={{ opacity: 0.6 }}>CURRENT WEEK: {currentWeek}</p>
+          <p className="hud-label settings-current-week">CURRENT WEEK: {currentWeek}</p>
         </header>
 
         <RoadMap currentWeek={currentWeek} />
 
-        <section aria-label="Audio settings" className="industrial-card settings-card" style={{ padding: '1.5rem' }}>
+        <section aria-label="Audio settings" className="industrial-card settings-card industrial-card-padded">
           <h2 className="history-title">AUDIO</h2>
           <div className="volume-control">
             <label className="hud-label" htmlFor="volume-slider">CUE VOLUME: {Math.round(volume * 100)}%</label>
@@ -115,7 +115,7 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
           aria-label="Program weeks"
           className="week-list"
         >
-          <h2 className="history-title" style={{ gridColumn: '1 / -1' }}>LEVEL SELECTOR</h2>
+          <h2 className="history-title level-selector-title">LEVEL SELECTOR</h2>
           {weekSummaries.map(({ label, week }) => {
             const isCurrent = week === currentWeek;
 
@@ -134,8 +134,7 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
 
         <section
           aria-label="Session history"
-          className="industrial-card history-card"
-          style={{ padding: '1.5rem' }}
+          className="industrial-card history-card industrial-card-padded"
         >
           <h2 className="history-title">RECENT WORKOUTS</h2>
           {recentHistory.length > 0 ? (
@@ -147,16 +146,15 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
               ))}
             </ul>
           ) : (
-            <p className="no-history-text" style={{ fontSize: '0.8rem', opacity: 0.5, fontStyle: 'italic' }}>No sessions logged yet.</p>
+            <p className="no-history-text">No sessions logged yet.</p>
           )}
         </section>
 
         <section aria-label="Danger zone" className="danger-zone">
           <button
-            className="control-btn secondary-btn danger-btn"
+            className="control-btn secondary-btn danger-btn full-width-btn"
             onClick={() => setShowResetConfirm(true)}
             type="button"
-            style={{ width: '100%', maxWidth: 'none' }}
           >
             Reset All Progress
           </button>
@@ -170,7 +168,7 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
           className="settings-modal"
         >
           <div className="settings-dialog industrial-card">
-            <h2 className="onboarding-title" style={{ fontSize: '1.25rem' }}>Skip to Week {pendingWeek}?</h2>
+            <h2 className="onboarding-title modal-title-refinement">Skip to Week {pendingWeek}?</h2>
             <p className="modal-text">
               This protocol is designed around cardiorespiratory recovery. Jumping ahead too quickly can make the next intervals harder to recover from.
             </p>
@@ -191,7 +189,7 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
           className="settings-modal"
         >
           <div className="settings-dialog industrial-card">
-            <h2 className="onboarding-title" style={{ fontSize: '1.25rem' }}>Reset all progress?</h2>
+            <h2 className="onboarding-title modal-title-refinement">Reset all progress?</h2>
             <p className="modal-text">
               This will permanently delete your history and reset your progress back to the beginning. This cannot be undone.
             </p>

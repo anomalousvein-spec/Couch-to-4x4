@@ -82,9 +82,9 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
 
         {currentFact && (
           <div className="bio-insight-ticker">
-            <span className="hud-label" style={{ color: 'var(--neon-orange)' }}>BIO-INSIGHT:</span>
+            <span className="hud-label insight-label">BIO-INSIGHT:</span>
             <p className="ticker-text">{currentFact.text}</p>
-            {currentFact.source && <span className="ticker-source" style={{ fontSize: '0.6rem', opacity: 0.5, marginTop: '0.5rem', display: 'block' }}>SOURCE: {currentFact.source}</span>}
+            {currentFact.source && <span className="ticker-source">SOURCE: {currentFact.source}</span>}
           </div>
         )}
       </section>

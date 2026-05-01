@@ -90,11 +90,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <h1 className="onboarding-title">Safety First</h1>
 
             <section className="warning-callout">
-              <h3 style={{ color: 'var(--neon-orange)', marginTop: 0 }}>⚠️ Medical Clearance Required</h3>
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
+              <h3 className="medical-clearance-title">⚠️ Medical Clearance Required</h3>
+              <p className="onboarding-p-refinement">
                 Before starting high-intensity training, please consult your physician, especially if you have:
               </p>
-              <ul style={{ fontSize: '0.9rem', lineHeight: '1.6', marginTop: '0.5rem', marginBottom: 0 }}>
+              <ul className="onboarding-list">
                 <li>Cardiovascular concerns or heart conditions</li>
                 <li>High blood pressure</li>
                 <li>Recent injuries or surgery</li>
@@ -104,8 +104,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             </section>
 
             <section className="info-callout">
-              <h3 style={{ color: 'var(--neon-cyan)', marginTop: 0 }}>📋 Safety Guidelines</h3>
-              <ul style={{ fontSize: '0.85rem', lineHeight: '1.6', margin: '0.5rem 0 0 0', paddingLeft: '1.2rem' }}>
+              <h3 className="guidelines-title">📋 Safety Guidelines</h3>
+              <ul className="guidelines-list">
                 {SAFETY_WARNINGS.map((warning, idx) => (
                   <li key={idx}>{warning}</li>
                 ))}
@@ -114,10 +114,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
             {!protocolConfirmed ? (
               <button
-                className="onboarding-btn primary-btn"
+                className="onboarding-btn primary-btn orange-border-btn"
                 onClick={() => setProtocolConfirmed(true)}
                 type="button"
-                style={{ borderColor: 'var(--neon-orange)', color: 'var(--neon-orange)' }}
               >
                 <strong>I Understand & Accept</strong>
               </button>
@@ -131,53 +130,39 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <>
             <h1 className="onboarding-title">Exercise Options</h1>
 
-            <p style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <p className="onboarding-disclaimer">
               The Norwegian 4x4 protocol is sport-agnostic. Choose any cardio activity:
             </p>
 
-            <section style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: '0.75rem',
-              margin: '1.5rem 0',
-              padding: '1rem',
-              background: 'rgba(0, 229, 255, 0.03)',
-              borderRadius: '8px'
-            }}>
+            <section className="exercise-grid">
               {EXERCISE_TYPES.map((exercise) => (
-                <div key={exercise.name} style={{
-                  padding: '0.75rem',
-                  background: 'rgba(0, 229, 255, 0.08)',
-                  borderRadius: '6px',
-                  textAlign: 'center'
-                }}>
-                  <strong style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{exercise.name}</strong>
-                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>{exercise.description}</span>
+                <div key={exercise.name} className="exercise-item">
+                  <strong className="exercise-name">{exercise.name}</strong>
+                  <span className="exercise-desc">{exercise.description}</span>
                 </div>
               ))}
             </section>
 
             <section className="success-callout">
-              <h3 style={{ color: 'var(--neon-green)', marginTop: 0 }}>🥗 Nutrition Tips</h3>
-              <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
-                <p style={{ margin: '0.5rem 0' }}><strong>Pre-Workout:</strong> {NUTRITION_GUIDANCE.preWorkout}</p>
-                <p style={{ margin: '0.5rem 0' }}><strong>During:</strong> {NUTRITION_GUIDANCE.during}</p>
-                <p style={{ margin: '0.5rem 0' }}><strong>Post-Workout:</strong> {NUTRITION_GUIDANCE.postWorkout}</p>
+              <h3 className="nutrition-title">🥗 Nutrition Tips</h3>
+              <div className="nutrition-content">
+                <p className="nutrition-p"><strong>Pre-Workout:</strong> {NUTRITION_GUIDANCE.preWorkout}</p>
+                <p className="nutrition-p"><strong>During:</strong> {NUTRITION_GUIDANCE.during}</p>
+                <p className="nutrition-p"><strong>Post-Workout:</strong> {NUTRITION_GUIDANCE.postWorkout}</p>
               </div>
             </section>
 
             <section className="technical-quote">
-              <p style={{ margin: 0 }}>
+              <p className="technical-quote-p">
                 &ldquo;The Norwegian 4x4 is evidence-based and effective. It is designed to be difficult. It works because it is hard.&rdquo;
               </p>
             </section>
 
             {!protocolConfirmed ? (
               <button
-                className="onboarding-btn primary-btn"
+                className="onboarding-btn primary-btn orange-border-btn"
                 onClick={() => setProtocolConfirmed(true)}
                 type="button"
-                style={{ borderColor: 'var(--neon-orange)', color: 'var(--neon-orange)' }}
               >
                 <strong>I&apos;m Ready</strong>
               </button>
@@ -188,18 +173,17 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 <section
                   aria-label="Choose starting point"
                   className="onboarding-options"
-                  style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}
                 >
                   <button className="onboarding-btn primary-btn" onClick={() => handleComplete(1)} type="button">
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className="option-btn-content">
                       <strong>Starting Fresh</strong>
-                      <span style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'none', letterSpacing: 'normal' }}>Beginning the journey</span>
+                      <span className="option-btn-subtitle">Beginning the journey</span>
                     </div>
                   </button>
                   <button className="onboarding-btn secondary-btn" onClick={() => handleComplete(5)} type="button">
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className="option-btn-content">
                       <strong>Already Active</strong>
-                      <span style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'none', letterSpacing: 'normal' }}>Jumping in at Week 5</span>
+                      <span className="option-btn-subtitle">Jumping in at Week 5</span>
                     </div>
                   </button>
                 </section>

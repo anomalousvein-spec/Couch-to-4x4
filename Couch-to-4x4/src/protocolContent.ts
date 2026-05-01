@@ -47,9 +47,9 @@ export const SCIENCE_FACTS: ScienceFact[] = [
 /**
  * Calculates a gamified "Mitochondrial Boost" score based on the workout intensity.
  * This is a representative metric for "Biological ROI".
+ * Formula: 1.25 units per minute of high-intensity work (representative metric)
  */
 export function calculateMitochondrialBoost(intervals: number, workSeconds: number): number {
-  // Base boost is 1.25 units per minute of high-intensity work
   const workMinutes = (intervals * workSeconds) / 60;
   return Math.round(workMinutes * 1.25 * 10) / 10;
 }

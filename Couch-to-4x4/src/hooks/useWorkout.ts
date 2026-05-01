@@ -4,6 +4,9 @@ import { useWakeLock } from './useWakeLock';
 import { useHaptics } from './useHaptics';
 import { AudioManager } from '../utils/AudioManager';
 
+const GLITCH_DURATION_SHORT = 100;
+const GLITCH_DURATION_MEDIUM = 500;
+
 /**
  * Custom hook for managing workout state and controls.
  * Creates an isolated workout engine instance per component mount.
@@ -25,7 +28,7 @@ export function useWorkout(config: WorkoutConfig) {
 
   const triggerGlitch = useCallback(() => {
     setIsGlitching(true);
-    setTimeout(() => setIsGlitching(false), 1000);
+    setTimeout(() => setIsGlitching(false), GLITCH_DURATION_SHORT);
   }, []);
 
   const handleStart = useCallback(() => engine.start(), [engine]);
@@ -117,7 +120,7 @@ export function useWorkout(config: WorkoutConfig) {
       triggerPhaseChangeHaptic();
       setIsWarningActive(false);
       setIsGlitching(true);
-      const timeoutId = setTimeout(() => setIsGlitching(false), 500);
+      const timeoutId = setTimeout(() => setIsGlitching(false), GLITCH_DURATION_MEDIUM);
       return () => clearTimeout(timeoutId);
     } else {
       setIsWarningActive(false);

@@ -1,6 +1,6 @@
 # Audio Cues
 
-These cue files are MP3 audio assets used by the Couch to 4x4 app.
+These are the final production MP3 audio assets used by the Couch to 4x4 app.
 
 ## Available Cue Files
 

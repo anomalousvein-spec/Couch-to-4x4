@@ -6,6 +6,7 @@
   --neon-blue: #005dff;
   --neon-cyan: #00e5ff;
   --neon-orange: #ffb000;
+  --error-red: #ff4444;
   --panel-bg: rgba(7, 10, 15, 0.9);
   --panel-border: rgba(0, 229, 255, 0.5);
   --text-bright: #f4fbff;
@@ -755,6 +756,18 @@ button:active {
 
 .industrial-input:focus {
   box-shadow: var(--glow-cyan);
+}
+
+.industrial-input.input-error {
+  border-color: var(--error-red);
+  box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.error-message {
+  color: var(--error-red);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
 }
 
 .age-label {

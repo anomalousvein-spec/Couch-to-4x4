@@ -2,37 +2,29 @@
 # Build artifacts
 dist/
 build/
-*.js
 
 # Dependencies
 node_modules/
-
-# Editors
-.vscode/
-.idea/
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Logs and temp files
+# Editors
+.vscode/
+.idea/
+
+# Logs
 *.log
-*.tmp
-*.swp
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Compiled
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
+.Python
+venv/
+.venv/
+.env
 ```

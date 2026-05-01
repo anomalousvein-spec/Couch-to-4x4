@@ -75,7 +75,7 @@ export function useWorkout(config: WorkoutConfig) {
       setShowSuccessCheck(true);
       void AudioManager.playCue('/audio/workout_complete.mp3');
     }
-  }, [state.status, completionHandled]);
+  }, [state.status, completionHandled, setShowSuccessCheck]);
 
   // Effect: Phase Change Audio Cues
   useEffect(() => {

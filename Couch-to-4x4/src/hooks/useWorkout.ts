@@ -28,6 +28,17 @@ export function useWorkout(config: WorkoutConfig) {
     setTimeout(() => setIsGlitching(false), 1000);
   }, []);
 
+  const handleStart = useCallback(() => engine.start(), [engine]);
+  const handlePause = useCallback(() => engine.pause(), [engine]);
+  const handleReset = useCallback(() => {
+    engine.reset();
+    setCompletionHandled(false);
+    setShowSuccessCheck(false);
+    setIsWarningActive(false);
+    lastPhaseRef.current = null;
+  }, [engine]);
+  const handleSkipPhase = useCallback(() => engine.skipPhase(), [engine]);
+
   // Configure engine when config changes
   useEffect(() => {
     engine.pause();
@@ -48,70 +59,70 @@ export function useWorkout(config: WorkoutConfig) {
     };
   }, [config, engine, triggerGlitch]);
 
-  // Handle side effects based on engine state
+  // Effect: Wake Lock Management
   useEffect(() => {
-    const { status, secondsRemaining, phase } = state;
+    if (state.status === 'running') {
+      void requestWakeLock();
+    } else if (state.status === 'paused' || state.status === 'completed' || state.status === 'idle') {
+      void releaseWakeLock();
+    }
+  }, [state.status, requestWakeLock, releaseWakeLock]);
 
-    if (status === 'completed' && !completionHandled) {
+  // Effect: Workout Completion
+  useEffect(() => {
+    if (state.status === 'completed' && !completionHandled) {
       setCompletionHandled(true);
       setShowSuccessCheck(true);
       void AudioManager.playCue('/audio/workout_complete.mp3');
-      void releaseWakeLock();
-      return;
+    }
+  }, [state.status, completionHandled]);
+
+  // Effect: Phase Change Audio Cues
+  useEffect(() => {
+    if (state.status !== 'running') return;
+
+    if (state.phase !== lastPhaseRef.current) {
+      const cueMap: Record<WorkoutPhase, string> = {
+        [WorkoutPhase.WORK]: '/audio/work_start_coached.mp3',
+        [WorkoutPhase.REST]: '/audio/rest_start_coached.mp3',
+        [WorkoutPhase.WARMUP]: '/audio/warmup_start.mp3',
+        [WorkoutPhase.COOLDOWN]: '/audio/cooldown_start.mp3',
+      };
+
+      const cue = cueMap[state.phase];
+      if (cue) {
+        void AudioManager.playCue(cue);
+      }
+      lastPhaseRef.current = state.phase;
+    }
+  }, [state.status, state.phase]);
+
+  // Effect: Interval Feedback (Warning & Haptics)
+  useEffect(() => {
+    if (state.status !== 'running') return;
+
+    const { secondsRemaining, phase } = state;
+
+    if (secondsRemaining === 10) {
+      void AudioManager.playCue('/audio/warning_10.mp3');
     }
 
-    if (status === 'running') {
-      void requestWakeLock();
-
-      // Handle Phase Change Audio Cues
-      if (phase !== lastPhaseRef.current) {
-        if (phase === WorkoutPhase.WORK) {
-          void AudioManager.playCue('/audio/work_start_coached.mp3');
-        } else if (phase === WorkoutPhase.REST) {
-          void AudioManager.playCue('/audio/rest_start_coached.mp3');
-        } else if (phase === WorkoutPhase.WARMUP) {
-          void AudioManager.playCue('/audio/warmup_start.mp3');
-        } else if (phase === WorkoutPhase.COOLDOWN) {
-          void AudioManager.playCue('/audio/cooldown_start.mp3');
-        }
-        lastPhaseRef.current = phase;
+    if (secondsRemaining <= 3 && secondsRemaining > 0) {
+      triggerWarningHaptic();
+      setIsWarningActive(true);
+      if (secondsRemaining === 3 && phase === WorkoutPhase.WORK) {
+        void AudioManager.playCue('/audio/warning_redline.mp3');
       }
-
-      // Feedback logic
-      if (secondsRemaining === 10) {
-        void AudioManager.playCue('/audio/warning_10.mp3');
-      }
-
-      if (secondsRemaining <= 3 && secondsRemaining > 0) {
-        triggerWarningHaptic();
-        setIsWarningActive(true);
-        if (secondsRemaining === 3 && phase === WorkoutPhase.WORK) {
-          void AudioManager.playCue('/audio/warning_redline.mp3');
-        }
-      } else if (secondsRemaining === 0) {
-        triggerPhaseChangeHaptic();
-        setIsWarningActive(false);
-        setIsGlitching(true);
-        const timeoutId = setTimeout(() => setIsGlitching(false), 500);
-        return () => clearTimeout(timeoutId);
-      } else {
-        setIsWarningActive(false);
-      }
-    } else if (status === 'paused') {
-      void releaseWakeLock();
+    } else if (secondsRemaining === 0) {
+      triggerPhaseChangeHaptic();
+      setIsWarningActive(false);
+      setIsGlitching(true);
+      const timeoutId = setTimeout(() => setIsGlitching(false), 500);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setIsWarningActive(false);
     }
-  }, [state, completionHandled, requestWakeLock, releaseWakeLock, triggerWarningHaptic, triggerPhaseChangeHaptic]);
-
-  const handleStart = useCallback(() => engine.start(), [engine]);
-  const handlePause = useCallback(() => engine.pause(), [engine]);
-  const handleReset = useCallback(() => {
-    engine.reset();
-    setCompletionHandled(false);
-    setShowSuccessCheck(false);
-    setIsWarningActive(false);
-    lastPhaseRef.current = null;
-  }, [engine]);
-  const handleSkipPhase = useCallback(() => engine.skipPhase(), [engine]);
+  }, [state, triggerWarningHaptic, triggerPhaseChangeHaptic]);
 
   const totalDuration = useMemo(() => engine.getTotalDurationSeconds(), [engine]);
   const elapsedSeconds = state.status !== 'idle' ? engine.getElapsedSeconds() : 0;

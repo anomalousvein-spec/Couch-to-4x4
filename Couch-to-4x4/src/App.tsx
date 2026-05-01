@@ -180,14 +180,8 @@ export function App() {
 
       <ConsistencyRing score={consistencyScore} />
 
-      <section className="angular-glass-card" style={{
-        margin: '1rem',
-        padding: '1rem',
-        border: '1px solid var(--neon-cyan)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: '0.85rem'
-      }}>
-        <strong style={{ color: 'var(--neon-cyan)', display: 'block', marginBottom: '0.5rem' }}>MISSION INTEL:</strong>
+      <section className="angular-glass-card mission-intel-box">
+        <strong className="intel-mission-header">MISSION INTEL:</strong>
         {missionIntel}
       </section>
 

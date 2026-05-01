@@ -42,7 +42,7 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
       <div className="success-card industrial-card">
         <header className="report-header">
           <h2 className="success-title">BIO-SYNC REPORT</h2>
-          <div className="hud-label" style={{ color: 'var(--neon-cyan)', textAlign: 'center', display: 'block' }}>PROTOCOL COMPLETED</div>
+          <div className="hud-label status-complete">PROTOCOL COMPLETED</div>
         </header>
 
         <div className="stats-grid">
@@ -52,20 +52,20 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
           </div>
           <div className="stat-item">
             <span className="hud-label">MITOCHONDRIAL BOOST</span>
-            <span className="hud-value" style={{ color: 'var(--neon-green)' }}>+{stats.mitochondrialBoost} ROI</span>
+            <span className="hud-value roi-value">+{stats.mitochondrialBoost} ROI</span>
           </div>
         </div>
 
         {showReward ? (
           <div className="reward-card">
-            <strong style={{ color: 'var(--neon-green)', display: 'block', marginBottom: '0.5rem' }}>BIOLOGICAL REWARD:</strong>
-            <p style={{ margin: 0, fontSize: '0.9rem' }}>
+            <strong className="reward-title">BIOLOGICAL REWARD:</strong>
+            <p className="reward-text">
               Biogenesis Triggered: Your heart and mitochondria are adapting.
             </p>
           </div>
         ) : (
           <div className="effort-selector">
-            <h3 className="hud-label" style={{ textAlign: 'center', marginBottom: '0.5rem' }}>Assess Adaptive Response:</h3>
+            <h3 className="hud-label assessment-label">Assess Adaptive Response:</h3>
             <button className="success-button repeat" onClick={() => onSuccessCheck("too-hard")} type="button">
               <strong>CRITICAL LOAD</strong>
               <span>Too hard, repeat level</span>
@@ -77,7 +77,7 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
           </div>
         )}
 
-        <footer className="report-footer" style={{ marginTop: '2rem', opacity: 0.5, textAlign: 'center', fontSize: '0.7rem' }}>
+        <footer className="report-footer">
           <p>Validated via Norwegian University of Science and Technology (NTNU) cardiovascular research.</p>
         </footer>
       </div>

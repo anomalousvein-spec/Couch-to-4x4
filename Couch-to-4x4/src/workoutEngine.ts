@@ -112,7 +112,7 @@ export function createWorkoutEngine() {
   function checkHalfway(remaining: number) {
     if (phase === WorkoutPhase.WORK && !halfwayFired) {
       const elapsed = config.workSeconds - remaining;
-      if (elapsed >= 120) {
+      if (elapsed >= Math.floor(config.workSeconds / 2)) {
         halfwayFired = true;
         onHalfway?.(phase);
       }

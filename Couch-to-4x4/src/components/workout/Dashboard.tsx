@@ -48,9 +48,9 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
       <section aria-live="polite" className="dashboard-readout">
         {currentWeek !== undefined ? (
           <p className="week-label">
-            Week {currentWeek}
+            WEEK {currentWeek}
             {sessionCount !== undefined
-              ? ` | ${sessionCount}/3 sessions completed`
+              ? ` | ${sessionCount}/3 SESSIONS`
               : ""}
           </p>
         ) : null}
@@ -72,19 +72,19 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
         <div className="phase-header">
           <p className="phase-label">{phase}</p>
           <div className="intensity-target">
-             <span className="intensity-tag">Target Intensity</span>
-             <span className="intensity-values">HR: {targetIntensity.hr} | RPE: {targetIntensity.rpe}</span>
+             <span className="hud-label">TARGET INTENSITY</span>
+             <span className="hud-value">HR: {targetIntensity.hr} | RPE: {targetIntensity.rpe}</span>
           </div>
         </div>
 
         <p className="interval-label">{intervalLabel}</p>
-        <p className="total-remaining-label">Total remaining: {formatTime(totalRemaining)}</p>
+        <p className="total-remaining-label">TOTAL REMAINING: {formatTime(totalRemaining)}</p>
 
         {currentFact && (
           <div className="bio-insight-ticker">
-            <span className="ticker-label">BIO-INSIGHT:</span>
+            <span className="hud-label" style={{ color: 'var(--neon-orange)' }}>BIO-INSIGHT:</span>
             <p className="ticker-text">{currentFact.text}</p>
-            {currentFact.source && <span className="ticker-source">Source: {currentFact.source}</span>}
+            {currentFact.source && <span className="ticker-source" style={{ fontSize: '0.6rem', opacity: 0.5, marginTop: '0.5rem', display: 'block' }}>SOURCE: {currentFact.source}</span>}
           </div>
         )}
       </section>

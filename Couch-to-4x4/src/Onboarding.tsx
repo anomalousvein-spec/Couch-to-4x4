@@ -81,7 +81,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               <p className="age-hint">Used to calculate target heart rate zones using the HUNT formula (211 - 0.64 × age).</p>
             </section>
 
-            <button className="onboarding-btn primary-btn" onClick={handleContinue} type="button" style={{ marginTop: '1.5rem' }}>
+            <button className="onboarding-btn primary-btn" onClick={handleContinue} type="button">
               <strong>Continue</strong>
             </button>
           </>
@@ -89,14 +89,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <>
             <h1 className="onboarding-title">Safety First</h1>
 
-            <section style={{
-              margin: '1.5rem 0',
-              padding: '1.5rem',
-              background: 'rgba(255, 176, 0, 0.05)',
-              borderLeft: '4px solid var(--neon-orange)',
-              fontFamily: 'var(--font-mono)',
-              textAlign: 'left'
-            }}>
+            <section className="warning-callout">
               <h3 style={{ color: 'var(--neon-orange)', marginTop: 0 }}>⚠️ Medical Clearance Required</h3>
               <p style={{ fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
                 Before starting high-intensity training, please consult your physician, especially if you have:
@@ -110,14 +103,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               </ul>
             </section>
 
-            <section style={{
-              margin: '1.5rem 0',
-              padding: '1rem',
-              background: 'rgba(0, 255, 255, 0.05)',
-              borderRadius: '8px',
-              fontFamily: 'var(--font-mono)',
-              textAlign: 'left'
-            }}>
+            <section className="info-callout">
               <h3 style={{ color: 'var(--neon-cyan)', marginTop: 0 }}>📋 Safety Guidelines</h3>
               <ul style={{ fontSize: '0.85rem', lineHeight: '1.6', margin: '0.5rem 0 0 0', paddingLeft: '1.2rem' }}>
                 {SAFETY_WARNINGS.map((warning, idx) => (
@@ -155,13 +141,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               gap: '0.75rem',
               margin: '1.5rem 0',
               padding: '1rem',
-              background: 'rgba(0, 255, 255, 0.03)',
+              background: 'rgba(0, 229, 255, 0.03)',
               borderRadius: '8px'
             }}>
               {EXERCISE_TYPES.map((exercise) => (
                 <div key={exercise.name} style={{
                   padding: '0.75rem',
-                  background: 'rgba(0, 255, 255, 0.08)',
+                  background: 'rgba(0, 229, 255, 0.08)',
                   borderRadius: '6px',
                   textAlign: 'center'
                 }}>
@@ -171,15 +157,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               ))}
             </section>
 
-            <section style={{
-              margin: '1.5rem 0',
-              padding: '1rem',
-              background: 'rgba(100, 255, 100, 0.05)',
-              borderRadius: '8px',
-              fontFamily: 'var(--font-mono)',
-              textAlign: 'left'
-            }}>
-              <h3 style={{ color: '#66ff66', marginTop: 0 }}>🥗 Nutrition Tips</h3>
+            <section className="success-callout">
+              <h3 style={{ color: 'var(--neon-green)', marginTop: 0 }}>🥗 Nutrition Tips</h3>
               <div style={{ fontSize: '0.85rem', lineHeight: '1.6' }}>
                 <p style={{ margin: '0.5rem 0' }}><strong>Pre-Workout:</strong> {NUTRITION_GUIDANCE.preWorkout}</p>
                 <p style={{ margin: '0.5rem 0' }}><strong>During:</strong> {NUTRITION_GUIDANCE.during}</p>
@@ -187,15 +166,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               </div>
             </section>
 
-            <section style={{
-              margin: '2rem 0',
-              padding: '1.5rem',
-              background: 'rgba(255, 176, 0, 0.05)',
-              borderLeft: '4px solid var(--neon-orange)',
-              fontFamily: 'var(--font-mono)',
-              textAlign: 'left'
-            }}>
-              <p style={{ fontSize: '1.1rem', lineHeight: '1.5', margin: 0 }}>
+            <section className="technical-quote">
+              <p style={{ margin: 0 }}>
                 &ldquo;The Norwegian 4x4 is evidence-based and effective. It is designed to be difficult. It works because it is hard.&rdquo;
               </p>
             </section>
@@ -216,14 +188,19 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 <section
                   aria-label="Choose starting point"
                   className="onboarding-options"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}
                 >
                   <button className="onboarding-btn primary-btn" onClick={() => handleComplete(1)} type="button">
-                    <strong>Starting Fresh</strong>
-                    <span>Beginning the journey</span>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <strong>Starting Fresh</strong>
+                      <span style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'none', letterSpacing: 'normal' }}>Beginning the journey</span>
+                    </div>
                   </button>
                   <button className="onboarding-btn secondary-btn" onClick={() => handleComplete(5)} type="button">
-                    <strong>Already Active</strong>
-                    <span>Jumping in at Week 5</span>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <strong>Already Active</strong>
+                      <span style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'none', letterSpacing: 'normal' }}>Jumping in at Week 5</span>
+                    </div>
                   </button>
                 </section>
               </>

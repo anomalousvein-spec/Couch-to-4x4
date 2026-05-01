@@ -13,7 +13,7 @@ import {
   saveWorkoutProgress,
   SESSIONS_PER_WEEK,
 } from "./progressStorage";
-import type { EffortRating, SessionHistoryEntry } from "./progressStorage";
+import type { EffortRating, SessionHistoryEntry, WorkoutProgress } from "./progressStorage";
 import WorkoutDisplay from "./WorkoutDisplay";
 
 type AppView = "workout" | "settings";
@@ -24,7 +24,7 @@ const ratingLabel: Record<EffortRating, string> = {
 };
 
 export function App() {
-  const [progress, setProgress] = useState(() => loadWorkoutProgress());
+  const [progress, setProgress] = useState<WorkoutProgress>(() => loadWorkoutProgress());
   const [history, setHistory] = useState<SessionHistoryEntry[]>(() => loadSessionHistory());
   const [view, setView] = useState<AppView>("workout");
 
@@ -38,10 +38,11 @@ export function App() {
     [currentWeek]
   );
 
-  const handleSelectWeek = useCallback((week: number): void => {
-    const nextProgress = {
+  const handleCompleteOnboarding = useCallback((week: number, age: number): void => {
+    const nextProgress: WorkoutProgress = {
       currentWeek: week,
       sessionCount: 0,
+      age: age,
     };
 
     saveWorkoutProgress(nextProgress);
@@ -49,9 +50,21 @@ export function App() {
     setView("workout");
   }, []);
 
+  const handleSelectWeek = useCallback((week: number): void => {
+    const nextProgress: WorkoutProgress = {
+      ...progress,
+      currentWeek: week,
+      sessionCount: 0,
+    };
+
+    saveWorkoutProgress(nextProgress);
+    setProgress(nextProgress);
+    setView("workout");
+  }, [progress]);
+
   const handleResetAll = useCallback((): void => {
     localStorage.clear();
-    setProgress({ currentWeek: null, sessionCount: 0 });
+    setProgress({ currentWeek: null, sessionCount: 0, age: null });
     setHistory([]);
     setView("workout");
   }, []);
@@ -85,7 +98,8 @@ export function App() {
       ? Math.min(progress.currentWeek + 1, MAX_PROGRAM_WEEK)
       : progress.currentWeek;
     const newSessionCount = shouldAdvanceWeek ? 0 : nextSessionCount;
-    const nextProgress = {
+    const nextProgress: WorkoutProgress = {
+      ...progress,
       currentWeek: newCurrentWeek,
       sessionCount: newSessionCount,
     };
@@ -95,7 +109,7 @@ export function App() {
   }, [progress]);
 
   if (currentWeek === null || config === null || currentGoal === null) {
-    return <Onboarding onSelectWeek={handleSelectWeek} />;
+    return <Onboarding onComplete={handleCompleteOnboarding} />;
   }
 
   const lastSession = history[0];
@@ -123,6 +137,7 @@ export function App() {
           currentWeek={currentWeek}
           onSuccessCheck={handleSuccessCheck}
           sessionCount={progress.sessionCount}
+          age={progress.age ?? 30}
         />
       ) : (
         <Settings

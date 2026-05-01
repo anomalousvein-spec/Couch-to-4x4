@@ -42,30 +42,22 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
       <div className="success-card industrial-card">
         <header className="report-header">
           <h2 className="success-title">BIO-SYNC REPORT</h2>
-          <div className="sync-status">PROTOCOL COMPLETED</div>
+          <div className="hud-label" style={{ color: 'var(--neon-cyan)', textAlign: 'center', display: 'block' }}>PROTOCOL COMPLETED</div>
         </header>
 
         <div className="stats-grid">
           <div className="stat-item">
-            <span className="stat-label">HIGH INTENSITY TIME</span>
-            <span className="stat-value">{formatTime(stats.totalWorkTime)}</span>
+            <span className="hud-label">HIGH INTENSITY TIME</span>
+            <span className="hud-value">{formatTime(stats.totalWorkTime)}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">MITOCHONDRIAL BOOST</span>
-            <span className="stat-value boost">+{stats.mitochondrialBoost} ROI</span>
+            <span className="hud-label">MITOCHONDRIAL BOOST</span>
+            <span className="hud-value" style={{ color: 'var(--neon-green)' }}>+{stats.mitochondrialBoost} ROI</span>
           </div>
         </div>
 
         {showReward ? (
-          <div className="biological-reward" style={{
-            padding: '1.5rem',
-            margin: '1rem 0',
-            border: '1px solid var(--neon-green)',
-            background: 'rgba(0, 255, 102, 0.05)',
-            fontFamily: 'var(--font-mono)',
-            textAlign: 'center',
-            animation: 'fade-in 0.5s ease-out'
-          }}>
+          <div className="reward-card">
             <strong style={{ color: 'var(--neon-green)', display: 'block', marginBottom: '0.5rem' }}>BIOLOGICAL REWARD:</strong>
             <p style={{ margin: 0, fontSize: '0.9rem' }}>
               Biogenesis Triggered: Your heart and mitochondria are adapting.
@@ -73,7 +65,7 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
           </div>
         ) : (
           <div className="effort-selector">
-            <h3 className="effort-title">Assess Adaptive Response:</h3>
+            <h3 className="hud-label" style={{ textAlign: 'center', marginBottom: '0.5rem' }}>Assess Adaptive Response:</h3>
             <button className="success-button repeat" onClick={() => onSuccessCheck("too-hard")} type="button">
               <strong>CRITICAL LOAD</strong>
               <span>Too hard, repeat level</span>
@@ -85,7 +77,7 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
           </div>
         )}
 
-        <footer className="report-footer">
+        <footer className="report-footer" style={{ marginTop: '2rem', opacity: 0.5, textAlign: 'center', fontSize: '0.7rem' }}>
           <p>Validated via Norwegian University of Science and Technology (NTNU) cardiovascular research.</p>
         </footer>
       </div>

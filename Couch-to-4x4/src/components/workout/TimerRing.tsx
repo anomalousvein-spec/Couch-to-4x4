@@ -39,7 +39,7 @@ export const TimerRing: React.FC<TimerRingProps> = React.memo(({
       >
         {secondsRemaining}
         <div className="phase-duration-readout">
-          {secondsRemaining} / {phaseDuration}s
+          {secondsRemaining} / {phaseDuration}S
         </div>
       </div>
     </div>

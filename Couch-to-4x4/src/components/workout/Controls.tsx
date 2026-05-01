@@ -17,9 +17,9 @@ export const Controls: React.FC<ControlsProps> = React.memo(({
   onSkipPhase,
 }) => {
   return (
-    <section aria-label="Workout controls" className="controls-container">
+    <section aria-label="Workout controls" className="controls-container" role="group">
       {status === 'running' ? (
-        <button className="control-btn primary-btn" onClick={onPause} type="button">
+        <button aria-pressed={status === 'running'} className="control-btn primary-btn" onClick={onPause} type="button">
           Pause
         </button>
       ) : (

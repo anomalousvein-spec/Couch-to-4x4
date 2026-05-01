@@ -165,10 +165,11 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
         <section
           aria-modal="true"
           role="dialog"
+          aria-labelledby="skip-week-title"
           className="settings-modal"
         >
           <div className="settings-dialog industrial-card">
-            <h2 className="onboarding-title modal-title-refinement">Skip to Week {pendingWeek}?</h2>
+            <h2 id="skip-week-title" className="onboarding-title modal-title-refinement">Skip to Week {pendingWeek}?</h2>
             <p className="modal-text">
               This protocol is designed around cardiorespiratory recovery. Jumping ahead too quickly can make the next intervals harder to recover from.
             </p>
@@ -186,10 +187,11 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
         <section
           aria-modal="true"
           role="dialog"
+          aria-labelledby="reset-title"
           className="settings-modal"
         >
           <div className="settings-dialog industrial-card">
-            <h2 className="onboarding-title modal-title-refinement">Reset all progress?</h2>
+            <h2 id="reset-title" className="onboarding-title modal-title-refinement">Reset all progress?</h2>
             <p className="modal-text">
               This will permanently delete your history and reset your progress back to the beginning. This cannot be undone.
             </p>

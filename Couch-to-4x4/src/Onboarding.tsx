@@ -12,17 +12,29 @@ export function Onboarding({ onSelectWeek }: OnboardingProps) {
 
         <div className="protocol-info">
           <p>
-            The Norwegian 4x4 protocol is one of the most effective ways to improve VO2 max.
+            The Norwegian 4x4 protocol is the <strong>most evidence-based, time-efficient method</strong> for maximizing VO2 Max and cardiovascular health ROI.
           </p>
           <ul className="protocol-steps">
             <li><strong>Warm-up:</strong> 5 minutes at a moderate pace.</li>
-            <li><strong>Intervals:</strong> 4 minutes of high-intensity work followed by 3 minutes of active recovery.</li>
+            <li><strong>Intervals:</strong> High-intensity work followed by 3 minutes of active recovery.</li>
             <li><strong>Cool-down:</strong> 5 minutes at a slow pace.</li>
           </ul>
-          <p>
-            This app helps you build up to the full 4x4 standard over several weeks.
-          </p>
         </div>
+
+        <section className="intensity-guide-box">
+          <h2 className="guide-title">Intensity Guide (RPE)</h2>
+          <p className="guide-text">RPE (Rate of Perceived Exertion) is how hard you feel you&apos;re working on a scale of 1-10.</p>
+          <div className="rpe-scale">
+             <div className="rpe-item low">
+                <span className="rpe-num">3-4</span>
+                <span className="rpe-desc">Warmup/Rest (Can talk easily)</span>
+             </div>
+             <div className="rpe-item high">
+                <span className="rpe-num">9-10</span>
+                <span className="rpe-desc">Interval (Huffing &amp; puffing)</span>
+             </div>
+          </div>
+        </section>
 
         <h2 className="onboarding-subtitle">How active have you been lately?</h2>
 

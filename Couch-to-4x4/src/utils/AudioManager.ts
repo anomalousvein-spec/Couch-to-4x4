@@ -1,3 +1,5 @@
+import { AUDIO_SETTINGS_KEY } from '../constants';
+
 type WindowWithAudioContext = Window & {
   webkitAudioContext?: typeof AudioContext;
 };
@@ -12,11 +14,20 @@ class AudioManagerImpl {
   private activeCueCount = 0;
   private visibilityListenerAttached = false;
   private visibilityHandler: (() => void) | null = null;
-  private volume: number = parseFloat(localStorage.getItem("couchTo4x4.volume") ?? "1.0");
+  private volume: number = 1.0;
+
+  constructor() {
+    this.loadVolume();
+  }
+
+  private loadVolume(): void {
+    const stored = localStorage.getItem(AUDIO_SETTINGS_KEY);
+    this.volume = stored ? parseFloat(stored) : 1.0;
+  }
 
   public setVolume(value: number): void {
     this.volume = Math.max(0, Math.min(1, value));
-    localStorage.setItem("couchTo4x4.volume", String(this.volume));
+    localStorage.setItem(AUDIO_SETTINGS_KEY, String(this.volume));
     if (this.cueGain) {
       this.cueGain.gain.setTargetAtTime(this.volume, this.getContext().currentTime, 0.1);
     }
@@ -64,11 +75,11 @@ class AudioManagerImpl {
 
       this.beginCue();
 
-      source.addEventListener("ended", () => {
+      source.onended = () => {
         source.disconnect();
         sourceGain.disconnect();
         this.endCue();
-      });
+      };
 
       source.start(now);
     } catch (error) {
@@ -84,10 +95,6 @@ class AudioManagerImpl {
     await this.context.resume().catch(() => undefined);
   }
 
-  /**
-   * Cleans up the audio manager by removing event listeners and releasing resources.
-   * Call this when the audio manager is no longer needed to prevent memory leaks.
-   */
   public cleanup(): void {
     if (this.visibilityListenerAttached && this.visibilityHandler) {
       document.removeEventListener("visibilitychange", this.visibilityHandler);

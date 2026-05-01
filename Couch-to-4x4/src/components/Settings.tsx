@@ -101,7 +101,7 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
           {recentHistory.length > 0 ? (
             <ul className="history-list">
               {recentHistory.map((entry) => (
-                <li key={entry.id} className="history-item">
+                <li key={entry.timestamp} className="history-item">
                   {formatHistoryEntry(entry)}
                 </li>
               ))}

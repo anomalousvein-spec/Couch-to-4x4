@@ -18,13 +18,11 @@ export function useWorkout(config: WorkoutConfig) {
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
   const { triggerWarningHaptic, triggerPhaseChangeHaptic } = useHaptics();
 
-  // Track completion state locally instead of using refs that escape the hook
+  // Track completion state locally
   const [completionHandled, setCompletionHandled] = useState(false);
-  const [workoutStarted, setWorkoutStarted] = useState(false);
 
-  // Configure engine when config changes - with proper cleanup
+  // Configure engine when config changes
   useEffect(() => {
-    // Pause and reset engine before reconfiguring to prevent timer conflicts
     engine.pause();
     engine.setConfig(config);
     
@@ -32,30 +30,29 @@ export function useWorkout(config: WorkoutConfig) {
     
     return () => {
       unsubscribe();
+      engine.cleanup();
     };
   }, [config, engine]);
 
-  // Handle wake lock based on workout status
+  // Handle side effects based on engine state
   useEffect(() => {
-    if (state.status === 'completed' && !completionHandled) {
+    const { status, secondsRemaining } = state;
+
+    if (status === 'completed' && !completionHandled) {
       setCompletionHandled(true);
       setShowSuccessCheck(true);
       void releaseWakeLock();
-    } else if (state.status === 'running') {
-      void requestWakeLock();
-      setWorkoutStarted(true);
-    } else if (state.status === 'paused') {
-      void releaseWakeLock();
+      return;
     }
-  }, [state.status, completionHandled, requestWakeLock, releaseWakeLock]);
 
-  // Audio and Haptic feedback logic
-  useEffect(() => {
-    if (state.status === 'running') {
-      if (state.secondsRemaining <= 3 && state.secondsRemaining > 0) {
+    if (status === 'running') {
+      void requestWakeLock();
+
+      // Feedback logic
+      if (secondsRemaining <= 3 && secondsRemaining > 0) {
         triggerWarningHaptic();
         setIsWarningActive(true);
-      } else if (state.secondsRemaining === 0) {
+      } else if (secondsRemaining === 0) {
         triggerPhaseChangeHaptic();
         setIsWarningActive(false);
         setIsGlitching(true);
@@ -64,30 +61,23 @@ export function useWorkout(config: WorkoutConfig) {
       } else {
         setIsWarningActive(false);
       }
+    } else if (status === 'paused') {
+      void releaseWakeLock();
     }
-    return undefined;
-  }, [state.secondsRemaining, state.status, triggerWarningHaptic, triggerPhaseChangeHaptic]);
-
-  // Cleanup engine on unmount
-  useEffect(() => {
-    return () => {
-      engine.cleanup();
-    };
-  }, [engine]);
+  }, [state, completionHandled, requestWakeLock, releaseWakeLock, triggerWarningHaptic, triggerPhaseChangeHaptic]);
 
   const handleStart = useCallback(() => engine.start(), [engine]);
   const handlePause = useCallback(() => engine.pause(), [engine]);
   const handleReset = useCallback(() => {
     engine.reset();
     setCompletionHandled(false);
-    setWorkoutStarted(false);
     setShowSuccessCheck(false);
     setIsWarningActive(false);
   }, [engine]);
   const handleSkipPhase = useCallback(() => engine.skipPhase(), [engine]);
 
-  const totalDuration = engine.getTotalDurationSeconds();
-  const elapsedSeconds = engine.getElapsedSeconds();
+  const totalDuration = useMemo(() => engine.getTotalDurationSeconds(), [engine]);
+  const elapsedSeconds = state.status !== 'idle' ? engine.getElapsedSeconds() : 0;
 
   return {
     state,
@@ -101,11 +91,8 @@ export function useWorkout(config: WorkoutConfig) {
     handlePause,
     handleReset,
     handleSkipPhase,
-    completionHandled,
     setCompletionHandled,
-    workoutStarted,
-    setWorkoutStarted,
-    clearWarning: () => setIsWarningActive(false),
+    clearWarning: useCallback(() => setIsWarningActive(false), []),
     releaseWakeLock
   };
 }

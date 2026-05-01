@@ -12,7 +12,7 @@ export function Onboarding({ onSelectWeek }: OnboardingProps) {
 
         <div className="protocol-info">
           <p>
-            The Norwegian 4x4 protocol is one of the most effective ways to improve VO2 max.
+            The Norwegian 4x4 protocol is the <strong>most evidence-based, time-efficient method</strong> for maximizing VO2 Max and cardiovascular health ROI.
           </p>
           <ul className="protocol-steps">
             <li><strong>Warm-up:</strong> 5 minutes at a moderate pace.</li>
@@ -31,7 +31,7 @@ export function Onboarding({ onSelectWeek }: OnboardingProps) {
              </div>
              <div className="rpe-item high">
                 <span className="rpe-num">9-10</span>
-                <span className="rpe-desc">Interval (Huffing & puffing)</span>
+                <span className="rpe-desc">Interval (Huffing &amp; puffing)</span>
              </div>
           </div>
         </section>

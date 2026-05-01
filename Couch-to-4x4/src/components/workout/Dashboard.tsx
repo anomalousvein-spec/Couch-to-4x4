@@ -84,6 +84,7 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
           <div className="bio-insight-ticker">
             <span className="ticker-label">BIO-INSIGHT:</span>
             <p className="ticker-text">{currentFact.text}</p>
+            {currentFact.source && <span className="ticker-source">Source: {currentFact.source}</span>}
           </div>
         )}
       </section>

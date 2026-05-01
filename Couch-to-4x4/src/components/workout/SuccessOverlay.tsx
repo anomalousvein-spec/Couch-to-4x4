@@ -57,6 +57,10 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
             <span>Just right, progress</span>
           </button>
         </div>
+
+        <footer className="report-footer">
+          <p>Validated via Norwegian University of Science and Technology (NTNU) cardiovascular research.</p>
+        </footer>
       </div>
     </section>
   );

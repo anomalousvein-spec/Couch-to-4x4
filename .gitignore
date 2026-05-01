@@ -2,44 +2,32 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
-dist/
-build/
-target/
+# Package lock files
+package-lock.json
 
-# Environment variables
+# Test files
+**/__tests__/**
+**/*.test.*
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
 .env
 .env.local
 *.env.*
 
-# Cache directories
-.cache/
-.node_cache/
-.npm/
-.yarn/
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.temp
-*~
+# Editors
+.vscode/
+.idea/
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# IDE specific
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Python specific (if applicable)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
+# Build outputs
+dist/
+build/
+target/
 ```

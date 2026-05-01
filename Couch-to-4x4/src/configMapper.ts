@@ -1,12 +1,15 @@
-import type { WorkoutConfig } from "./workoutEngine";
+import {
+  WARMUP_SECONDS,
+  REST_SECONDS,
+  COOLDOWN_SECONDS,
+} from "./constants";
+import { WorkoutConfig } from "./workoutEngine";
 
-const WARMUP_SECONDS = 5 * 60;
-const REST_SECONDS = 3 * 60;
-const COOLDOWN_SECONDS = 5 * 60;
-
-const weeklyProgression: Array<Pick<WorkoutConfig, "intervals" | "workSeconds">> = [
+export const weeklyProgression = [
   { intervals: 2, workSeconds: 30 },
-  { intervals: 2, workSeconds: 30 },
+  { intervals: 2, workSeconds: 45 },
+  { intervals: 2, workSeconds: 60 },
+  { intervals: 3, workSeconds: 30 },
   { intervals: 3, workSeconds: 45 },
   { intervals: 3, workSeconds: 45 },
   { intervals: 4, workSeconds: 30 },
@@ -73,4 +76,21 @@ function formatDuration(seconds: number): string {
   }
 
   return `${seconds}s`;
+}
+
+export interface HRZones {
+  workMin: number;
+  workMax: number;
+  restMin: number;
+  restMax: number;
+}
+
+export function calculateHRZones(age: number): HRZones {
+  const maxHR = 220 - age;
+  return {
+    workMin: Math.round(maxHR * 0.85),
+    workMax: Math.round(maxHR * 0.95),
+    restMin: Math.round(maxHR * 0.6),
+    restMax: Math.round(maxHR * 0.7),
+  };
 }

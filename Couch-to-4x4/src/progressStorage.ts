@@ -12,6 +12,7 @@ export interface SessionHistoryEntry {
 export interface WorkoutProgress {
   currentWeek: number | null;
   sessionCount: number;
+  age: number | null;
 }
 
 const STORAGE_KEY_PROGRESS = "couchTo4x4.progress";
@@ -20,12 +21,12 @@ const STORAGE_KEY_HISTORY = "couchTo4x4.history";
 export function loadWorkoutProgress(): WorkoutProgress {
   const stored = localStorage.getItem(STORAGE_KEY_PROGRESS);
   if (!stored) {
-    return { currentWeek: null, sessionCount: 0 };
+    return { currentWeek: null, sessionCount: 0, age: null };
   }
   try {
     return JSON.parse(stored);
   } catch {
-    return { currentWeek: null, sessionCount: 0 };
+    return { currentWeek: null, sessionCount: 0, age: null };
   }
 }
 

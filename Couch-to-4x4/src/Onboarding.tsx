@@ -1,8 +1,21 @@
+import { useState } from 'react';
+
 interface OnboardingProps {
-  onSelectWeek: (week: number) => void;
+  onComplete: (week: number, age: number) => void;
 }
 
-export function Onboarding({ onSelectWeek }: OnboardingProps) {
+export function Onboarding({ onComplete }: OnboardingProps) {
+  const [age, setAge] = useState<string>('30');
+
+  const handleComplete = (week: number) => {
+    const ageNum = parseInt(age, 10);
+    if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
+      alert("Please enter a valid age between 1 and 120.");
+      return;
+    }
+    onComplete(week, ageNum);
+  };
+
   return (
     <main className="onboarding-screen">
       <div className="onboarding-card industrial-card">
@@ -36,17 +49,34 @@ export function Onboarding({ onSelectWeek }: OnboardingProps) {
           </div>
         </section>
 
+        <section className="age-input-section">
+          <h2 className="onboarding-subtitle">Your Age</h2>
+          <div className="age-input-container">
+            <input
+              type="number"
+              id="age-input"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              min="1"
+              max="120"
+              className="industrial-input"
+            />
+            <label htmlFor="age-input" className="age-label">YEARS OLD</label>
+          </div>
+          <p className="age-hint">Used to calculate target heart rate zones.</p>
+        </section>
+
         <h2 className="onboarding-subtitle">How active have you been lately?</h2>
 
         <section
           aria-label="Choose starting point"
           className="onboarding-options"
         >
-          <button className="onboarding-btn primary-btn" onClick={() => onSelectWeek(1)} type="button">
+          <button className="onboarding-btn primary-btn" onClick={() => handleComplete(1)} type="button">
             <strong>Starting Fresh</strong>
             <span>Beginning the journey</span>
           </button>
-          <button className="onboarding-btn secondary-btn" onClick={() => onSelectWeek(5)} type="button">
+          <button className="onboarding-btn secondary-btn" onClick={() => handleComplete(5)} type="button">
             <strong>Already Active</strong>
             <span>Jumping in at Week 5</span>
           </button>

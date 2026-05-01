@@ -6,12 +6,14 @@ import { TimerRing } from "./components/workout/TimerRing";
 import { Dashboard } from "./components/workout/Dashboard";
 import { Controls } from "./components/workout/Controls";
 import { SuccessOverlay } from "./components/workout/SuccessOverlay";
+import { calculateHRZones } from "./configMapper";
 
 interface WorkoutDisplayProps {
   config: WorkoutConfig;
   currentWeek?: number;
   onSuccessCheck?: (result: "too-hard" | "progress") => void;
   sessionCount?: number;
+  age: number;
 }
 
 export function WorkoutDisplay({
@@ -19,6 +21,7 @@ export function WorkoutDisplay({
   currentWeek,
   onSuccessCheck,
   sessionCount,
+  age,
 }: WorkoutDisplayProps) {
   const {
     state,
@@ -76,7 +79,15 @@ export function WorkoutDisplay({
     return totalDuration > 0 ? (elapsedSeconds / totalDuration) * 100 : 0;
   }, [elapsedSeconds, totalDuration]);
 
+  const hrZones = useMemo(() => calculateHRZones(age), [age]);
+
   if (!state) return null;
+
+  const showHRHUD = state.phase === WorkoutPhase.WORK || state.phase === WorkoutPhase.REST;
+  const hrTargetText = state.phase === WorkoutPhase.WORK
+    ? `TARGET: ${hrZones.workMin}–${hrZones.workMax} BPM`
+    : `TARGET: ${hrZones.restMin}–${hrZones.restMax} BPM`;
+  const hrTargetClass = state.phase === WorkoutPhase.WORK ? "target-work pulse-active" : "target-rest";
 
   return (
     <main className={workoutClassName}>
@@ -88,6 +99,19 @@ export function WorkoutDisplay({
         totalRemaining={totalDuration - elapsedSeconds}
         totalProgress={totalProgress}
       />
+
+      {showHRHUD && (
+        <section className="hr-hud-container">
+          <div className="angular-glass-card hr-hud-card">
+            <div className={`hr-target-display ${hrTargetClass}`}>
+              {hrTargetText}
+            </div>
+            <footer className="hr-hud-footer">
+              MONITOR WATCH — STAY IN THE ZONE
+            </footer>
+          </div>
+        </section>
+      )}
 
       <TimerRing
         secondsRemaining={state.secondsRemaining}

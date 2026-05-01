@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { SAFETY_WARNINGS, EXERCISE_TYPES, NUTRITION_GUIDANCE } from './configMapper';
 
 interface OnboardingProps {
@@ -9,22 +9,28 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const [age, setAge] = useState<string>('30');
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [protocolConfirmed, setProtocolConfirmed] = useState(false);
+  const [ageError, setAgeError] = useState<string | null>(null);
+  const ageInputRef = useRef<HTMLInputElement>(null);
   
-  const handleComplete = (week: number) => {
+  const validateAge = (): boolean => {
     const ageNum = parseInt(age, 10);
     if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
-      alert("Please enter a valid age between 1 and 120.");
-      return;
+      setAgeError("Please enter a valid age between 1 and 120.");
+      ageInputRef.current?.focus();
+      return false;
     }
+    setAgeError(null);
+    return true;
+  };
+
+  const handleComplete = (week: number) => {
+    if (!validateAge()) return;
+    const ageNum = parseInt(age, 10);
     onComplete(week, ageNum);
   };
 
   const handleContinue = () => {
-    const ageNum = parseInt(age, 10);
-    if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
-      alert("Please enter a valid age between 1 and 120.");
-      return;
-    }
+    if (!validateAge()) return;
     setStep(2);
   };
 
@@ -68,16 +74,27 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               <h2 className="onboarding-subtitle">Your Age</h2>
               <div className="age-input-container">
                 <input
+                  ref={ageInputRef}
                   type="number"
                   id="age-input"
                   value={age}
-                  onChange={(e) => setAge(e.target.value)}
+                  onChange={(e) => {
+                    setAge(e.target.value);
+                    if (ageError) setAgeError(null);
+                  }}
                   min="1"
                   max="120"
-                  className="industrial-input"
+                  className={`industrial-input ${ageError ? 'input-error' : ''}`}
+                  aria-invalid={!!ageError}
+                  aria-describedby={ageError ? "age-error-message" : undefined}
                 />
                 <label htmlFor="age-input" className="age-label">YEARS OLD</label>
               </div>
+              {ageError && (
+                <p id="age-error-message" className="error-message" role="alert">
+                  {ageError}
+                </p>
+              )}
               <p className="age-hint">Used to calculate target heart rate zones using the HUNT formula (211 - 0.64 × age).</p>
             </section>
 

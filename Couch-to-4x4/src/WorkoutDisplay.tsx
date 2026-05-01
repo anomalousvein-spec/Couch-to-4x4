@@ -110,7 +110,14 @@ export function WorkoutDisplay({
       />
 
       {showSuccessCheck ? (
-        <SuccessOverlay onSuccessCheck={handleSuccessCheck} />
+        <SuccessOverlay
+          onSuccessCheck={handleSuccessCheck}
+          config={{
+            intervals: config.intervals,
+            workSeconds: config.workSeconds,
+            restSeconds: config.restSeconds
+          }}
+        />
       ) : null}
     </main>
   );

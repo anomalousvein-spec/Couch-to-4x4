@@ -1,14 +1,13 @@
-const CACHE_NAME = "couch-to-4x4-audio-v3";
+const CACHE_NAME = "couch-to-4x4-audio-v4";
 const AUDIO_ASSETS = [
-  "/audio/warmup_start.wav",
-  "/audio/work_start.wav",
-  "/audio/rest_start.wav",
-  "/audio/warning_10.wav",
-  "/audio/cooldown_start.wav",
-  "/audio/workout_complete.wav",
-  "/audio/work_halfway.mp3",
+  "/audio/warmup_start.mp3",
   "/audio/work_start_coached.mp3",
   "/audio/rest_start_coached.mp3",
+  "/audio/warning_10.mp3",
+  "/audio/warning_redline.mp3",
+  "/audio/cooldown_start.mp3",
+  "/audio/workout_complete.mp3",
+  "/audio/work_halfway.mp3",
 ];
 
 self.addEventListener("install", (event) => {
@@ -41,7 +40,7 @@ self.addEventListener("fetch", (event) => {
     event.request.method === "GET" &&
     requestUrl.origin === self.location.origin &&
     requestUrl.pathname.startsWith("/audio/") &&
-    requestUrl.pathname.endsWith(".wav");
+    requestUrl.pathname.endsWith(".mp3");
 
   if (!isAudioRequest) {
     return;

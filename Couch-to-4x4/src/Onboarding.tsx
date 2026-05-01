@@ -207,7 +207,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 type="button"
                 style={{ borderColor: 'var(--neon-orange)', color: 'var(--neon-orange)' }}
               >
-                <strong>I'm Ready</strong>
+                <strong>I&apos;m Ready</strong>
               </button>
             ) : (
               <>

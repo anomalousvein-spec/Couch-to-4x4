@@ -1,0 +1,24 @@
+<<<<<<< SEARCH
+      // Feedback logic
+      if (secondsRemaining <= 3 && secondsRemaining > 0) {
+        triggerWarningHaptic();
+        setIsWarningActive(true);
+        if (secondsRemaining === 3) {
+            // Optional: could trigger warning audio here if needed,
+            // but requirements focus on start and halfway cues.
+        }
+      } else if (secondsRemaining === 0) {
+=======
+      // Feedback logic
+      if (secondsRemaining === 10) {
+        void AudioManager.playCue('/audio/warning_10.mp3');
+      }
+
+      if (secondsRemaining <= 3 && secondsRemaining > 0) {
+        triggerWarningHaptic();
+        setIsWarningActive(true);
+        if (secondsRemaining === 3 && phase === WorkoutPhase.WORK) {
+          void AudioManager.playCue('/audio/warning_redline.mp3');
+        }
+      } else if (secondsRemaining === 0) {
+>>>>>>> REPLACE

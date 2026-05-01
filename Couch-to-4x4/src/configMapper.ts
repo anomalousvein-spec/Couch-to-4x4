@@ -99,19 +99,58 @@ export interface HRZones {
 }
 
 export function calculateHRZones(age: number): HRZones {
-  const maxHR = 220 - age;
+  // Use the HUNT formula (most accurate according to Norwegian research)
+  // HRmax = 211 - (0.64 × age)
+  const maxHR = 211 - (0.64 * age);
   return {
     workMin: Math.round(maxHR * 0.85),
     workMax: Math.round(maxHR * 0.95),
-    restMin: Math.round(maxHR * 0.6),
-    restMax: Math.round(maxHR * 0.7),
+    restMin: Math.round(maxHR * 0.60),
+    restMax: Math.round(maxHR * 0.70),
   };
 }
 
 export const RESEARCH_FACTS = [
   "Why 4 minutes? This duration maximizes time spent at high stroke volume, leading to a stronger heart.",
   "Consistency > Intensity: VO2max gains begin with any increase from zero. The habit loop is your foundation.",
-  "Active Recovery: Keeping your HR at 60% during rest helps clear lactate for the next interval.",
+  "Active Recovery: Keeping your HR at 60-70% during rest helps clear lactate for the next interval.",
   "The Norwegian 4x4 protocol is designed to maximize oxygen uptake (VO2max) through high-intensity intervals.",
-  "High stroke volume during 4-minute intervals helps the heart pump more blood with each beat."
+  "High stroke volume during 4-minute intervals helps the heart pump more blood with each beat.",
+  "Studies show 10-15% improvement in VO2 max after 8-12 weeks of consistent 4x4 training.",
+  "The 3-minute active recovery keeps metabolism elevated while preparing for the next interval.",
+  "VO2 Max is the single best predictor of longevity and cardiovascular health."
 ];
+
+/**
+ * Safety warnings and medical clearance guidance based on Norwegian 4x4 protocol.
+ */
+export const SAFETY_WARNINGS = [
+  "Consult your physician before starting high-intensity training, especially if you have cardiovascular concerns.",
+  "Get a baseline fitness assessment if possible before beginning the program.",
+  "Never skip the warm-up - it prepares your heart and muscles for high-intensity effort.",
+  "Stop immediately if you experience chest pain, dizziness, or severe shortness of breath.",
+  "Stay hydrated throughout your workout.",
+  "Allow at least 48 hours of recovery between 4x4 sessions.",
+  "The cool-down is essential for proper recovery - don't skip it."
+];
+
+/**
+ * Exercise variety recommendations for the Norwegian 4x4 protocol.
+ */
+export const EXERCISE_TYPES = [
+  { name: "Running", description: "Outdoor or treadmill running" },
+  { name: "Cycling", description: "Stationary bike or road cycling" },
+  { name: "Rowing", description: "Rowing machine for full-body workout" },
+  { name: "Swimming", description: "Pool or open water swimming" },
+  { name: "Cross-country Skiing", description: "Excellent full-body cardio option" },
+  { name: "Elliptical", description: "Low-impact alternative" }
+];
+
+/**
+ * Nutritional guidance for pre/during/post-workout.
+ */
+export const NUTRITION_GUIDANCE = {
+  preWorkout: "Eat a light meal 2-3 hours before, or a small snack 30-60 minutes before. Focus on easily digestible carbs.",
+  during: "Small sips of water during recovery periods if needed. For workouts under 60 minutes, water is sufficient.",
+  postWorkout: "Consume protein and carbs within 30-60 minutes after your workout to aid recovery and replenish glycogen."
+};

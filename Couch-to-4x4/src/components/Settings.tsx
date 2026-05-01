@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { getAllWeekSummaries } from "../configMapper";
+import { getAllWeekSummaries, getPhase } from "../configMapper";
 import {
   type SessionHistoryEntry,
 } from "../progressStorage";
@@ -16,6 +16,43 @@ const ratingLabel: Record<SessionHistoryEntry["rating"], string> = {
   "too-hard": "Too Hard",
   progress: "Just Right",
 };
+
+function RoadMap({ currentWeek }: { currentWeek: number }) {
+  const currentPhase = getPhase(currentWeek);
+  const phases: Array<{ name: string; key: "Habit" | "Intervals" | "Threshold" | "HIIT"; class: string }> = [
+    { name: "Habit", key: "Habit", class: "habit" },
+    { name: "Intervals", key: "Intervals", class: "intervals" },
+    { name: "Threshold", key: "Threshold", class: "threshold" },
+    { name: "HIIT", key: "HIIT", class: "hiit" },
+  ];
+
+  const phaseOrder = ["Habit", "Intervals", "Threshold", "HIIT"];
+  const currentPhaseIndex = phaseOrder.indexOf(currentPhase);
+
+  return (
+    <div className="road-map-container industrial-card">
+      <h2 className="road-map-title">Road to 4x4</h2>
+      <div className="road-map-track">
+        {phases.map((phase, index) => {
+          const isActive = phase.key === currentPhase;
+          const isCompleted = index < currentPhaseIndex;
+
+          return (
+            <div
+              key={phase.key}
+              className={`phase-node ${phase.class} ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
+            >
+              <div className="node-dot">
+                {isCompleted ? "✓" : index + 1}
+              </div>
+              <span className="node-label">{phase.name}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: SettingsProps) {
   const [pendingWeek, setPendingWeek] = useState<number | null>(null);
@@ -55,6 +92,8 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
           <h1 className="settings-title">Control Center</h1>
           <p className="current-week-text">Current Week: {currentWeek}</p>
         </header>
+
+        <RoadMap currentWeek={currentWeek} />
 
         <section aria-label="Audio settings" className="industrial-card settings-card">
           <h2 className="history-title">Audio</h2>

@@ -24,6 +24,41 @@ const ratingLabel: Record<EffortRating, string> = {
   progress: "Just Right",
 };
 
+function ConsistencyRing({ score }: { score: number }) {
+  const radius = 25;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
+
+  return (
+    <div className="consistency-dashboard">
+      <div className="consistency-ring-container">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle
+            className="consistency-ring-bg"
+            cx="30"
+            cy="30"
+            r={radius}
+          />
+          <circle
+            className="consistency-ring-progress"
+            cx="30"
+            cy="30"
+            r={radius}
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            transform="rotate(-90 30 30)"
+          />
+        </svg>
+      </div>
+      <div className="consistency-label">
+        <span className="consistency-title">Consistency Score</span>
+        <span className="consistency-value">{Math.round(score)}%</span>
+        <span className="consistency-subtext">Last 28 days</span>
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const [progress, setProgress] = useState<WorkoutProgress>(() => loadWorkoutProgress());
   const [history, setHistory] = useState<SessionHistoryEntry[]>(() => loadSessionHistory());
@@ -38,6 +73,13 @@ export function App() {
     () => (currentWeek === null ? null : getCurrentGoalLabel(currentWeek)),
     [currentWeek]
   );
+
+  const consistencyScore = useMemo(() => {
+    const twentyEightDaysAgo = Date.now() - 28 * 24 * 60 * 60 * 1000;
+    const recentSessions = history.filter(entry => entry.timestamp >= twentyEightDaysAgo).length;
+    const goalSessions = SESSIONS_PER_WEEK * 4;
+    return Math.min(100, (recentSessions / goalSessions) * 100);
+  }, [history]);
 
   const missionIntel = useMemo(() => {
     return RESEARCH_FACTS[Math.floor(Math.random() * RESEARCH_FACTS.length)];
@@ -135,6 +177,8 @@ export function App() {
           </div>
         ) : null}
       </aside>
+
+      <ConsistencyRing score={consistencyScore} />
 
       <section className="angular-glass-card" style={{
         margin: '1rem',

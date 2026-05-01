@@ -22,10 +22,23 @@ export const weeklyProgression = [
   { intervals: 4, workSeconds: 180 },
   { intervals: 4, workSeconds: 240 },
   { intervals: 4, workSeconds: 240 },
+  { intervals: 4, workSeconds: 240 },
+  { intervals: 4, workSeconds: 240 },
+  { intervals: 4, workSeconds: 240 },
+  { intervals: 4, workSeconds: 240 },
 ];
 
 export const MIN_PROGRAM_WEEK = 1;
 export const MAX_PROGRAM_WEEK = weeklyProgression.length;
+
+export type WorkoutPhase = "Habit" | "Intervals" | "Threshold" | "HIIT";
+
+export function getPhase(week: number): WorkoutPhase {
+  if (week <= 4) return "Habit";
+  if (week <= 8) return "Intervals";
+  if (week <= 12) return "Threshold";
+  return "HIIT";
+}
 
 export function getWorkoutConfig(week: number): WorkoutConfig {
   const safeWeek = Math.min(

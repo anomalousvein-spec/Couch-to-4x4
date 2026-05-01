@@ -55,7 +55,7 @@ export function useWorkout(config: WorkoutConfig) {
     if (status === 'completed' && !completionHandled) {
       setCompletionHandled(true);
       setShowSuccessCheck(true);
-      void AudioManager.playCue('/audio/workout_complete.wav');
+      void AudioManager.playCue('/audio/workout_complete.mp3');
       void releaseWakeLock();
       return;
     }
@@ -70,20 +70,23 @@ export function useWorkout(config: WorkoutConfig) {
         } else if (phase === WorkoutPhase.REST) {
           void AudioManager.playCue('/audio/rest_start_coached.mp3');
         } else if (phase === WorkoutPhase.WARMUP) {
-          void AudioManager.playCue('/audio/warmup_start.wav');
+          void AudioManager.playCue('/audio/warmup_start.mp3');
         } else if (phase === WorkoutPhase.COOLDOWN) {
-          void AudioManager.playCue('/audio/cooldown_start.wav');
+          void AudioManager.playCue('/audio/cooldown_start.mp3');
         }
         lastPhaseRef.current = phase;
       }
 
       // Feedback logic
+      if (secondsRemaining === 10) {
+        void AudioManager.playCue('/audio/warning_10.mp3');
+      }
+
       if (secondsRemaining <= 3 && secondsRemaining > 0) {
         triggerWarningHaptic();
         setIsWarningActive(true);
-        if (secondsRemaining === 3) {
-            // Optional: could trigger warning audio here if needed,
-            // but requirements focus on start and halfway cues.
+        if (secondsRemaining === 3 && phase === WorkoutPhase.WORK) {
+          void AudioManager.playCue('/audio/warning_redline.mp3');
         }
       } else if (secondsRemaining === 0) {
         triggerPhaseChangeHaptic();

@@ -17,6 +17,15 @@ export interface WorkoutProgress {
 
 const STORAGE_KEY_PROGRESS = "couchTo4x4.progress";
 const STORAGE_KEY_HISTORY = "couchTo4x4.history";
+const STORAGE_KEY_SETTINGS = "couchTo4x4.settings";
+const STORAGE_KEY_ONBOARDING = "couchTo4x4.onboarding";
+
+export const ALL_STORAGE_KEYS = [
+  STORAGE_KEY_PROGRESS,
+  STORAGE_KEY_HISTORY,
+  STORAGE_KEY_SETTINGS,
+  STORAGE_KEY_ONBOARDING,
+];
 
 export function loadWorkoutProgress(): WorkoutProgress {
   const stored = localStorage.getItem(STORAGE_KEY_PROGRESS);
@@ -65,6 +74,10 @@ export function logSession(
   localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(nextHistory));
 
   return entry;
+}
+
+export function clearAllAppData(): void {
+  ALL_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
 }
 
 export { SESSIONS_PER_WEEK };

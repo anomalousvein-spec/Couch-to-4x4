@@ -94,3 +94,11 @@ export function calculateHRZones(age: number): HRZones {
     restMax: Math.round(maxHR * 0.7),
   };
 }
+
+export const RESEARCH_FACTS = [
+  "Why 4 minutes? This duration maximizes time spent at high stroke volume, leading to a stronger heart.",
+  "Consistency > Intensity: VO2max gains begin with any increase from zero. The habit loop is your foundation.",
+  "Active Recovery: Keeping your HR at 60% during rest helps clear lactate for the next interval.",
+  "The Norwegian 4x4 protocol is designed to maximize oxygen uptake (VO2max) through high-intensity intervals.",
+  "High stroke volume during 4-minute intervals helps the heart pump more blood with each beat."
+];

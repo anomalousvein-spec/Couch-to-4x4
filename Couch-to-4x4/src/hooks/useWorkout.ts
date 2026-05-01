@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { createWorkoutEngine, type WorkoutConfig, type WorkoutEngineInstance } from '../workoutEngine';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { createWorkoutEngine, WorkoutPhase, type WorkoutConfig, type WorkoutEngineInstance } from '../workoutEngine';
 import { useWakeLock } from './useWakeLock';
 import { useHaptics } from './useHaptics';
+import { AudioManager } from '../utils/AudioManager';
 
 /**
  * Custom hook for managing workout state and controls.
@@ -20,6 +21,12 @@ export function useWorkout(config: WorkoutConfig) {
 
   // Track completion state locally
   const [completionHandled, setCompletionHandled] = useState(false);
+  const lastPhaseRef = useRef<WorkoutPhase | null>(null);
+
+  const triggerGlitch = useCallback(() => {
+    setIsGlitching(true);
+    setTimeout(() => setIsGlitching(false), 1000);
+  }, []);
 
   // Configure engine when config changes
   useEffect(() => {
@@ -28,19 +35,27 @@ export function useWorkout(config: WorkoutConfig) {
     
     const unsubscribe = engine.subscribe(setState);
     
+    engine.setOnHalfway((phase) => {
+      if (phase === WorkoutPhase.WORK) {
+        void AudioManager.playCue('/audio/work_halfway.mp3');
+        triggerGlitch();
+      }
+    });
+
     return () => {
       unsubscribe();
       engine.cleanup();
     };
-  }, [config, engine]);
+  }, [config, engine, triggerGlitch]);
 
   // Handle side effects based on engine state
   useEffect(() => {
-    const { status, secondsRemaining } = state;
+    const { status, secondsRemaining, phase } = state;
 
     if (status === 'completed' && !completionHandled) {
       setCompletionHandled(true);
       setShowSuccessCheck(true);
+      void AudioManager.playCue('/audio/workout_complete.wav');
       void releaseWakeLock();
       return;
     }
@@ -48,10 +63,28 @@ export function useWorkout(config: WorkoutConfig) {
     if (status === 'running') {
       void requestWakeLock();
 
+      // Handle Phase Change Audio Cues
+      if (phase !== lastPhaseRef.current) {
+        if (phase === WorkoutPhase.WORK) {
+          void AudioManager.playCue('/audio/work_start_coached.mp3');
+        } else if (phase === WorkoutPhase.REST) {
+          void AudioManager.playCue('/audio/rest_start_coached.mp3');
+        } else if (phase === WorkoutPhase.WARMUP) {
+          void AudioManager.playCue('/audio/warmup_start.wav');
+        } else if (phase === WorkoutPhase.COOLDOWN) {
+          void AudioManager.playCue('/audio/cooldown_start.wav');
+        }
+        lastPhaseRef.current = phase;
+      }
+
       // Feedback logic
       if (secondsRemaining <= 3 && secondsRemaining > 0) {
         triggerWarningHaptic();
         setIsWarningActive(true);
+        if (secondsRemaining === 3) {
+            // Optional: could trigger warning audio here if needed,
+            // but requirements focus on start and halfway cues.
+        }
       } else if (secondsRemaining === 0) {
         triggerPhaseChangeHaptic();
         setIsWarningActive(false);
@@ -73,6 +106,7 @@ export function useWorkout(config: WorkoutConfig) {
     setCompletionHandled(false);
     setShowSuccessCheck(false);
     setIsWarningActive(false);
+    lastPhaseRef.current = null;
   }, [engine]);
   const handleSkipPhase = useCallback(() => engine.skipPhase(), [engine]);
 

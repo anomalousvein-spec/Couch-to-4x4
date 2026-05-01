@@ -3,6 +3,7 @@ import {
   getCurrentGoalLabel,
   getWorkoutConfig,
   MAX_PROGRAM_WEEK,
+  RESEARCH_FACTS,
 } from "./configMapper";
 import Settings from "./components/Settings";
 import Onboarding from "./Onboarding";
@@ -37,6 +38,10 @@ export function App() {
     () => (currentWeek === null ? null : getCurrentGoalLabel(currentWeek)),
     [currentWeek]
   );
+
+  const missionIntel = useMemo(() => {
+    return RESEARCH_FACTS[Math.floor(Math.random() * RESEARCH_FACTS.length)];
+  }, []);
 
   const handleCompleteOnboarding = useCallback((week: number, age: number): void => {
     const nextProgress: WorkoutProgress = {
@@ -130,6 +135,17 @@ export function App() {
           </div>
         ) : null}
       </aside>
+
+      <section className="angular-glass-card" style={{
+        margin: '1rem',
+        padding: '1rem',
+        border: '1px solid var(--neon-cyan)',
+        fontFamily: 'var(--font-mono)',
+        fontSize: '0.85rem'
+      }}>
+        <strong style={{ color: 'var(--neon-cyan)', display: 'block', marginBottom: '0.5rem' }}>MISSION INTEL:</strong>
+        {missionIntel}
+      </section>
 
       {view === "workout" ? (
         <WorkoutDisplay

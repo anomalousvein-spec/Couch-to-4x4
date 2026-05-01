@@ -32,9 +32,11 @@ export const SuccessOverlay: React.FC<SuccessOverlayProps> = React.memo(({
   const handleProgress = () => {
     setShowReward(true);
     // Delay the completion to show the reward
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       onSuccessCheck("progress");
     }, 2000);
+    
+    return () => clearTimeout(timeoutId);
   };
 
   return (

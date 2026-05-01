@@ -32,5 +32,4 @@ npm run preview
 
 - Progress is stored locally in the browser with `localStorage`.
 - Audio cue paths are wired for files under `public/audio/`.
-- The current audio files are temporary beep placeholders. Replace them with final cue recordings when ready.
 - The service worker caches the workout audio cue files.

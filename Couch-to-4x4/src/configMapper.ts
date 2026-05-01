@@ -31,9 +31,9 @@ export const weeklyProgression = [
 export const MIN_PROGRAM_WEEK = 1;
 export const MAX_PROGRAM_WEEK = weeklyProgression.length;
 
-export type WorkoutPhase = "Habit" | "Intervals" | "Threshold" | "HIIT";
+export type ProgramPhase = "Habit" | "Intervals" | "Threshold" | "HIIT";
 
-export function getPhase(week: number): WorkoutPhase {
+export function getPhase(week: number): ProgramPhase {
   if (week <= 4) return "Habit";
   if (week <= 8) return "Intervals";
   if (week <= 12) return "Threshold";

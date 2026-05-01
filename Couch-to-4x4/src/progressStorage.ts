@@ -25,7 +25,8 @@ export function loadWorkoutProgress(): WorkoutProgress {
   }
   try {
     return JSON.parse(stored);
-  } catch {
+  } catch (error) {
+    console.error('Failed to parse workout progress from localStorage:', error);
     return { currentWeek: null, sessionCount: 0, age: null };
   }
 }
@@ -41,7 +42,8 @@ export function loadSessionHistory(): SessionHistoryEntry[] {
   }
   try {
     return JSON.parse(stored);
-  } catch {
+  } catch (error) {
+    console.error('Failed to parse session history from localStorage:', error);
     return [];
   }
 }

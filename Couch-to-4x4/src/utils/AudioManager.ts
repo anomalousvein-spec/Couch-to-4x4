@@ -7,6 +7,13 @@ type WindowWithAudioContext = Window & {
 const CUE_ATTACK_SECONDS = 0.02;
 const CUE_RELEASE_SECONDS = 0.08;
 
+type AudioLoadStatus = 'idle' | 'loading' | 'ready' | 'error';
+
+interface AudioManagerState {
+  status: AudioLoadStatus;
+  error?: string;
+}
+
 class AudioManagerImpl {
   private context: AudioContext | null = null;
   private cueGain: GainNode | null = null;
@@ -17,6 +24,9 @@ class AudioManagerImpl {
   private visibilityListenerAttached = false;
   private visibilityHandler: (() => void) | null = null;
   private volume: number = 1.0;
+  private loadStatus: AudioLoadStatus = 'idle';
+  private loadError?: string;
+  private statusListeners: ((state: AudioManagerState) => void)[] = [];
 
   constructor() {
     this.loadVolume();
@@ -110,6 +120,7 @@ class AudioManagerImpl {
       source.start(now);
     } catch (error) {
       console.error("Failed to play audio cue:", error);
+      this.setLoadStatus('error', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 
@@ -187,6 +198,8 @@ class AudioManagerImpl {
       return cachedBuffer;
     }
 
+    this.setLoadStatus('loading');
+
     const bufferPromise = fetch(url)
       .then((response) => {
         if (!response.ok) {
@@ -196,8 +209,13 @@ class AudioManagerImpl {
         return response.arrayBuffer();
       })
       .then((arrayBuffer) => this.getContext().decodeAudioData(arrayBuffer.slice(0)))
+      .then((buffer) => {
+        this.setLoadStatus('ready');
+        return buffer;
+      })
       .catch((error) => {
         this.bufferCache.delete(url);
+        this.setLoadStatus('error', error instanceof Error ? error.message : 'Unknown error');
         throw error;
       });
 
@@ -263,6 +281,36 @@ class AudioManagerImpl {
 
     document.addEventListener("visibilitychange", this.visibilityHandler);
     this.visibilityListenerAttached = true;
+  }
+
+  private setLoadStatus(status: AudioLoadStatus, error?: string): void {
+    this.loadStatus = status;
+    this.loadError = error;
+    this.notifyStatusListeners();
+  }
+
+  public getStatus(): AudioManagerState {
+    return {
+      status: this.loadStatus,
+      error: this.loadError,
+    };
+  }
+
+  public subscribeToStatus(listener: (state: AudioManagerState) => void): () => void {
+    this.statusListeners.push(listener);
+    // Immediately notify with current state
+    listener(this.getStatus());
+    return () => {
+      const index = this.statusListeners.indexOf(listener);
+      if (index > -1) {
+        this.statusListeners.splice(index, 1);
+      }
+    };
+  }
+
+  private notifyStatusListeners(): void {
+    const state = this.getStatus();
+    this.statusListeners.forEach(listener => listener(state));
   }
 }
 

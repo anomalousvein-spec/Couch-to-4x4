@@ -13,6 +13,7 @@ import {
   logSession,
   saveWorkoutProgress,
   SESSIONS_PER_WEEK,
+  clearAllAppData,
 } from "./progressStorage";
 import type { EffortRating, SessionHistoryEntry, WorkoutProgress } from "./progressStorage";
 import WorkoutDisplay from "./WorkoutDisplay";
@@ -110,7 +111,7 @@ export function App() {
   }, [progress]);
 
   const handleResetAll = useCallback((): void => {
-    localStorage.clear();
+    clearAllAppData();
     setProgress({ currentWeek: null, sessionCount: 0, age: null });
     setHistory([]);
     setView("workout");

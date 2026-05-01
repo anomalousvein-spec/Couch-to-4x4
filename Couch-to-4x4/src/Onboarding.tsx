@@ -91,7 +91,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 <label htmlFor="age-input" className="age-label">YEARS OLD</label>
               </div>
               {ageError && (
-                <p id="age-error-message" className="error-message" role="alert">
+                <p id="age-error-message" className="error-message" role="alert" aria-live="assertive">
                   {ageError}
                 </p>
               )}

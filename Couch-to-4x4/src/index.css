@@ -605,6 +605,45 @@ button:active {
   box-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
 }
 
+/* Error Boundary */
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 28rem;
+  margin: 2rem auto;
+}
+
+.error-boundary h2 {
+  font-family: "Orbitron", sans-serif;
+  color: var(--error-red);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+}
+
+.error-boundary .error-message {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.error-boundary .control-btn {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.error-boundary .control-btn:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: var(--neon-green);
+  box-shadow: var(--glow-green);
+}
+
 /* Animations */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }

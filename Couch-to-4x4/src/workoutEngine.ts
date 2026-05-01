@@ -39,6 +39,8 @@ export function createWorkoutEngine() {
   let phase: WorkoutPhase = WorkoutPhase.WARMUP;
   let currentInterval = 0;
   let secondsRemaining = DEFAULT_WARMUP_SECONDS;
+  let halfwayFired = false;
+  let onHalfway: ((phase: WorkoutPhase) => void) | null = null;
   let config: WorkoutConfig = {
     intervals: DEFAULT_INTERVALS,
     workSeconds: DEFAULT_WORK_SECONDS,
@@ -90,6 +92,7 @@ export function createWorkoutEngine() {
 
       if (newSecondsRemaining !== secondsRemaining) {
         secondsRemaining = newSecondsRemaining;
+        checkHalfway(secondsRemaining);
         if (secondsRemaining === 0) {
           nextPhase();
           if (status === 'running') {
@@ -104,6 +107,16 @@ export function createWorkoutEngine() {
         scheduleTick();
       }
     }, 100); // Check every 100ms for high precision
+  }
+
+  function checkHalfway(remaining: number) {
+    if (phase === WorkoutPhase.WORK && !halfwayFired) {
+      const elapsed = config.workSeconds - remaining;
+      if (elapsed >= 120) {
+        halfwayFired = true;
+        onHalfway?.(phase);
+      }
+    }
   }
 
   function pause() {
@@ -121,6 +134,7 @@ export function createWorkoutEngine() {
     phase = WorkoutPhase.WARMUP;
     currentInterval = 0;
     secondsRemaining = config.warmupSeconds;
+    halfwayFired = false;
     startTime = null;
     notify();
   }
@@ -137,6 +151,7 @@ export function createWorkoutEngine() {
   }
 
   function nextPhase() {
+    halfwayFired = false;
     if (phase === WorkoutPhase.WARMUP) {
       phase = WorkoutPhase.WORK;
       currentInterval = 1;
@@ -221,6 +236,9 @@ export function createWorkoutEngine() {
     getTotalDurationSeconds,
     getElapsedSeconds,
     subscribe,
+    setOnHalfway: (cb: (phase: WorkoutPhase) => void) => {
+      onHalfway = cb;
+    },
     cleanup,
   };
 }

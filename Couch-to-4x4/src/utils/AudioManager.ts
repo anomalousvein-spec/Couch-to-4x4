@@ -10,6 +10,8 @@ const CUE_RELEASE_SECONDS = 0.08;
 class AudioManagerImpl {
   private context: AudioContext | null = null;
   private cueGain: GainNode | null = null;
+  private mainGain: GainNode | null = null; // Gain for the silent "Stay Alive" loop
+  private silentLoopSource: AudioBufferSourceNode | null = null;
   private bufferCache = new Map<string, Promise<AudioBuffer>>();
   private activeCueCount = 0;
   private visibilityListenerAttached = false;
@@ -41,10 +43,30 @@ class AudioManagerImpl {
     const context = this.getContext();
     this.attachVisibilityListener();
     this.configureMediaSession();
+    this.startSilentLoop();
 
     if (context.state === "suspended") {
       await context.resume().catch(() => undefined);
     }
+  }
+
+  private startSilentLoop(): void {
+    if (this.silentLoopSource) return;
+
+    const context = this.getContext();
+    const buffer = context.createBuffer(1, 44100, 44100); // 1 second of silence
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+
+    this.mainGain = context.createGain();
+    this.mainGain.gain.value = 1.0;
+
+    source.connect(this.mainGain);
+    this.mainGain.connect(context.destination);
+
+    source.start();
+    this.silentLoopSource = source;
   }
 
   public async playCue(url: string): Promise<void> {
@@ -52,6 +74,10 @@ class AudioManagerImpl {
     const gain = this.getCueGain();
 
     await this.unlock();
+
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.playbackState = "playing";
+    }
 
     try {
       const buffer = await this.loadBuffer(url);
@@ -105,6 +131,17 @@ class AudioManagerImpl {
     if (this.cueGain) {
       this.cueGain.disconnect();
       this.cueGain = null;
+    }
+
+    if (this.silentLoopSource) {
+      this.silentLoopSource.stop();
+      this.silentLoopSource.disconnect();
+      this.silentLoopSource = null;
+    }
+
+    if (this.mainGain) {
+      this.mainGain.disconnect();
+      this.mainGain = null;
     }
     
     if (this.context) {
@@ -175,6 +212,11 @@ class AudioManagerImpl {
     if ("mediaSession" in navigator) {
       navigator.mediaSession.playbackState = "playing";
     }
+
+    // Duck the main silent loop volume to 10%
+    if (this.mainGain) {
+      this.mainGain.gain.setTargetAtTime(0.1, this.getContext().currentTime, 0.1);
+    }
   }
 
   private endCue(): void {
@@ -186,6 +228,11 @@ class AudioManagerImpl {
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.playbackState = "none";
+    }
+
+    // Restore the main silent loop volume to 100%
+    if (this.mainGain) {
+      this.mainGain.gain.setTargetAtTime(1.0, this.getContext().currentTime, 0.1);
     }
   }
 

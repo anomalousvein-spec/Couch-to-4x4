@@ -64,11 +64,10 @@ export function WorkoutDisplay({
       "workout-display",
       phaseClass,
       isWarningActive ? "phase-warning" : "",
-      isGlitching ? "glitching phase-change-flash" : "",
     ]
       .filter(Boolean)
       .join(" ");
-  }, [state, isWarningActive, isGlitching]);
+  }, [state, isWarningActive]);
 
   const phaseDuration = useMemo(() => {
     if (!state) return 0;
@@ -102,7 +101,7 @@ export function WorkoutDisplay({
 
       {showHRHUD && (
         <section className="hr-hud-container">
-          <div className="angular-glass-card hr-hud-card">
+          <div className={`angular-glass-card hr-hud-card ${isGlitching ? "glitching" : ""}`}>
             <div className={`hr-target-display ${hrTargetClass}`}>
               {hrTargetText}
             </div>

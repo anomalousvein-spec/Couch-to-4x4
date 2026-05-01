@@ -90,7 +90,7 @@ export function createWorkoutEngine() {
 
       const newSecondsRemaining = Math.max(0, baseSecondsRemaining - elapsedSec);
 
-      if (newSecondsRemaining !== secondsRemaining) {
+      if (newSecondsRemaining !== secondsRemaining || secondsRemaining === 0) {
         secondsRemaining = newSecondsRemaining;
         checkHalfway(secondsRemaining);
         if (secondsRemaining === 0) {
@@ -172,6 +172,10 @@ export function createWorkoutEngine() {
       status = 'completed';
       if (timerId) clearTimeout(timerId);
       timerId = null;
+    }
+
+    if (status !== 'completed' && secondsRemaining === 0) {
+      nextPhase();
     }
   }
 

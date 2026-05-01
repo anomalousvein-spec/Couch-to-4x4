@@ -1,0 +1,13 @@
+export const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 45;
+
+export const DEFAULT_WORKOUT_CONFIG = {
+  INTERVALS: 2,
+  WORK_SECONDS: 30,
+  REST_SECONDS: 180,
+  WARMUP_SECONDS: 300,
+  COOLDOWN_SECONDS: 300,
+};
+
+export const SESSIONS_PER_WEEK = 3;
+
+export const AUDIO_SETTINGS_KEY = "couchTo4x4.volume";

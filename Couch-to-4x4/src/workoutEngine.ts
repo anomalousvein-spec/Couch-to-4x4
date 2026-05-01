@@ -32,9 +32,7 @@ const DEFAULT_WARMUP_SECONDS = 300;
 const DEFAULT_COOLDOWN_SECONDS = 300;
 
 /**
- * Creates a new workout engine instance.
- * This factory function replaces the singleton pattern to improve testability
- * and align with React's rendering model.
+ * Creates a new workout engine instance with drift correction.
  */
 export function createWorkoutEngine() {
   let status: Status = 'idle';
@@ -48,7 +46,11 @@ export function createWorkoutEngine() {
     warmupSeconds: DEFAULT_WARMUP_SECONDS,
     cooldownSeconds: DEFAULT_COOLDOWN_SECONDS,
   };
-  let timer: number | null = null;
+
+  let timerId: number | null = null;
+  let startTime: number | null = null;
+  let baseSecondsRemaining: number = DEFAULT_WARMUP_SECONDS;
+
   const listeners: ((state: WorkoutState) => void)[] = [];
 
   function getState(): WorkoutState {
@@ -69,42 +71,69 @@ export function createWorkoutEngine() {
   function start() {
     if (status === 'running') return;
     status = 'running';
-    if (timer) clearInterval(timer);
-    timer = window.setInterval(() => tick(), 1000);
+    startTime = Date.now();
+    baseSecondsRemaining = secondsRemaining;
+    scheduleTick();
     notify();
+  }
+
+  function scheduleTick() {
+    if (status !== 'running') return;
+
+    timerId = window.setTimeout(() => {
+      if (!startTime) return;
+
+      const elapsedMs = Date.now() - startTime;
+      const elapsedSec = Math.floor(elapsedMs / 1000);
+
+      const newSecondsRemaining = Math.max(0, baseSecondsRemaining - elapsedSec);
+
+      if (newSecondsRemaining !== secondsRemaining) {
+        secondsRemaining = newSecondsRemaining;
+        if (secondsRemaining === 0) {
+          nextPhase();
+          if (status === 'running') {
+            startTime = Date.now();
+            baseSecondsRemaining = secondsRemaining;
+          }
+        }
+        notify();
+      }
+
+      if (status === 'running') {
+        scheduleTick();
+      }
+    }, 100); // Check every 100ms for high precision
   }
 
   function pause() {
     if (status !== 'running') return;
     status = 'paused';
-    if (timer) clearInterval(timer);
+    if (timerId) clearTimeout(timerId);
+    timerId = null;
     notify();
   }
 
   function reset() {
-    if (timer) clearInterval(timer);
+    if (timerId) clearTimeout(timerId);
+    timerId = null;
     status = 'idle';
     phase = WorkoutPhase.WARMUP;
     currentInterval = 0;
     secondsRemaining = config.warmupSeconds;
-    timer = null;
+    startTime = null;
     notify();
   }
 
   function skipPhase() {
     if (status !== 'idle') {
-      secondsRemaining = 0;
-      tick();
-    }
-  }
-
-  function tick() {
-    if (secondsRemaining > 0) {
-      secondsRemaining--;
-    } else {
       nextPhase();
+      if (status === 'running') {
+        startTime = Date.now();
+        baseSecondsRemaining = secondsRemaining;
+      }
+      notify();
     }
-    notify();
   }
 
   function nextPhase() {
@@ -126,7 +155,8 @@ export function createWorkoutEngine() {
       }
     } else if (phase === WorkoutPhase.COOLDOWN) {
       status = 'completed';
-      if (timer) clearInterval(timer);
+      if (timerId) clearTimeout(timerId);
+      timerId = null;
     }
   }
 
@@ -160,16 +190,6 @@ export function createWorkoutEngine() {
     return elapsed;
   }
 
-  function getPhaseDurationSeconds(): number {
-    switch (phase) {
-      case WorkoutPhase.WARMUP: return config.warmupSeconds;
-      case WorkoutPhase.WORK: return config.workSeconds;
-      case WorkoutPhase.REST: return config.restSeconds;
-      case WorkoutPhase.COOLDOWN: return config.cooldownSeconds;
-      default: return 0;
-    }
-  }
-
   function subscribe(listener: (state: WorkoutState) => void) {
     listeners.push(listener);
     return () => {
@@ -185,13 +205,9 @@ export function createWorkoutEngine() {
     listeners.forEach(l => l(state));
   }
 
-  /**
-   * Cleans up the engine by clearing the timer and removing all listeners.
-   * Call this when the engine is no longer needed to prevent memory leaks.
-   */
   function cleanup() {
-    if (timer) clearInterval(timer);
-    timer = null;
+    if (timerId) clearTimeout(timerId);
+    timerId = null;
     listeners.length = 0;
   }
 
@@ -204,7 +220,6 @@ export function createWorkoutEngine() {
     skipPhase,
     getTotalDurationSeconds,
     getElapsedSeconds,
-    getPhaseDurationSeconds,
     subscribe,
     cleanup,
   };

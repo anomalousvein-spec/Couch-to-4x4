@@ -85,6 +85,11 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
     AudioManager.setVolume(newVolume);
   };
 
+  const handleTestAudio = async (): Promise<void> => {
+    await AudioManager.unlock();
+    await AudioManager.playCue("/audio/pause_confirm.mp3", "TEST SIGNAL");
+  };
+
   return (
     <main className="settings-screen">
       <section className="settings-layout">
@@ -96,11 +101,21 @@ export function Settings({ currentWeek, history, onSelectWeek, onResetAll }: Set
         <RoadMap currentWeek={currentWeek} />
 
         <section aria-label="Audio settings" className="industrial-card settings-card industrial-card-padded">
-          <h2 className="history-title">AUDIO</h2>
+          <h2 className="history-title">AUDIO COMMS</h2>
           <div className="volume-control">
-            <label className="hud-label" htmlFor="volume-slider">CUE VOLUME: {Math.round(volume * 100)}%</label>
+            <div className="volume-header">
+              <label className="hud-label" htmlFor="volume-slider">CUE VOLUME: {Math.round(volume * 100)}%</label>
+              <button
+                className="control-btn secondary-btn test-audio-btn"
+                onClick={handleTestAudio}
+                type="button"
+              >
+                TEST SIGNAL
+              </button>
+            </div>
             <input
               id="volume-slider"
+              className="industrial-range"
               type="range"
               min="0"
               max="1"

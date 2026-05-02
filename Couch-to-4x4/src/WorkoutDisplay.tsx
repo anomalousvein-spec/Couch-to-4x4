@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { WorkoutPhase, type WorkoutConfig } from "./workoutEngine";
 import { useWorkout } from "./hooks/useWorkout";
 import { AudioManager } from "./utils/AudioManager";
@@ -40,6 +40,16 @@ export function WorkoutDisplay({
     releaseWakeLock,
   } = useWorkout(config);
 
+  const [isPhaseFlash, setIsPhaseFlash] = useState(false);
+
+  useEffect(() => {
+    if (state?.phase) {
+      setIsPhaseFlash(true);
+      const timer = setTimeout(() => setIsPhaseFlash(false), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [state?.phase]);
+
   const handleSuccessCheck = useCallback((result: "too-hard" | "progress"): void => {
     void AudioManager.unlock();
     onSuccessCheck?.(result);
@@ -64,10 +74,11 @@ export function WorkoutDisplay({
       "workout-display",
       phaseClass,
       isWarningActive ? "phase-warning" : "",
+      isPhaseFlash ? "phase-flash-active" : "",
     ]
       .filter(Boolean)
       .join(" ");
-  }, [state, isWarningActive]);
+  }, [state, isWarningActive, isPhaseFlash]);
 
   const phaseDuration = useMemo(() => {
     if (!state) return 0;
@@ -85,8 +96,15 @@ export function WorkoutDisplay({
   const showHRHUD = state.phase === WorkoutPhase.WORK || state.phase === WorkoutPhase.REST;
   const hrTargetText = state.phase === WorkoutPhase.WORK
     ? `TARGET: ${hrZones.workMin}–${hrZones.workMax} BPM`
-    : `TARGET: ${hrZones.restMin}–${hrZones.restMax} BPM`;
-  const hrTargetClass = state.phase === WorkoutPhase.WORK ? "target-work pulse-active" : "target-rest";
+    : state.phase === WorkoutPhase.REST
+      ? `TARGET: ${hrZones.restMin}–${hrZones.restMax} BPM`
+      : "STANDBY: PREPARING PROTOCOL";
+
+  const hrTargetClass = state.phase === WorkoutPhase.WORK
+    ? "target-work pulse-active"
+    : state.phase === WorkoutPhase.REST
+      ? "target-rest"
+      : "target-standby";
 
   return (
     <main className={workoutClassName}>
@@ -99,18 +117,16 @@ export function WorkoutDisplay({
         totalProgress={totalProgress}
       />
 
-      {showHRHUD && (
-        <section className="hr-hud-container">
-          <div className={`angular-glass-card hr-hud-card ${isGlitching ? "glitching" : ""}`}>
-            <div className={`hr-target-display ${hrTargetClass}`}>
-              {hrTargetText}
-            </div>
-            <footer className="hr-hud-footer">
-              MONITOR WATCH — STAY IN THE ZONE
-            </footer>
+      <section className="hr-hud-container">
+        <div className={`angular-glass-card hr-hud-card ${isGlitching ? "glitching" : ""} ${!showHRHUD ? "hud-standby" : ""}`}>
+          <div className={`hr-target-display ${hrTargetClass}`}>
+            {hrTargetText}
           </div>
-        </section>
-      )}
+          <footer className="hr-hud-footer">
+            {showHRHUD ? "MONITOR WATCH — STAY IN THE ZONE" : "SYSTEM CALIBRATING"}
+          </footer>
+        </div>
+      </section>
 
       <TimerRing
         secondsRemaining={state.secondsRemaining}

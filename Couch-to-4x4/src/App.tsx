@@ -26,14 +26,14 @@ const ratingLabel: Record<EffortRating, string> = {
 };
 
 function ConsistencyRing({ score }: { score: number }) {
-  const radius = 25;
+  const radius = 22;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="consistency-dashboard">
+    <div className="consistency-mini">
       <div className="consistency-ring-container">
-        <svg width="60" height="60" viewBox="0 0 60 60">
+        <svg width="50" height="50" viewBox="0 0 60 60">
           <circle
             className="consistency-ring-bg"
             cx="30"
@@ -50,13 +50,56 @@ function ConsistencyRing({ score }: { score: number }) {
             transform="rotate(-90 30 30)"
           />
         </svg>
+        <span className="consistency-mini-value">{Math.round(score)}%</span>
       </div>
-      <div className="consistency-label">
-        <span className="consistency-title">Consistency Score</span>
-        <span className="consistency-value">{Math.round(score)}%</span>
-        <span className="consistency-subtext">Last 28 days</span>
-      </div>
+      <span className="hud-label consistency-mini-label">CONSISTENCY</span>
     </div>
+  );
+}
+
+function CommandCenter({
+  currentGoal,
+  sessionCount,
+  consistencyScore,
+  missionIntel,
+  lastSession
+}: {
+  currentGoal: string;
+  sessionCount: number;
+  consistencyScore: number;
+  missionIntel: string;
+  lastSession?: SessionHistoryEntry;
+}) {
+  return (
+    <header className="command-center angular-glass-card">
+      <div className="command-layout-main">
+        <div className="objective-sector">
+          <span className="hud-label sector-tag">PRIMARY OBJECTIVE</span>
+          <h2 className="objective-title">{currentGoal}</h2>
+          <div className="objective-status">
+            PROGRESS: {sessionCount}/{SESSIONS_PER_WEEK} SESSIONS
+          </div>
+        </div>
+
+        <div className="stats-sector">
+          <ConsistencyRing score={consistencyScore} />
+        </div>
+      </div>
+
+      <div className="intel-sector">
+        <div className="intel-inner">
+          <span className="hud-label intel-tag">MISSION INTEL:</span>
+          <p className="intel-content">{missionIntel}</p>
+        </div>
+      </div>
+
+      {lastSession && (
+        <div className="log-sector">
+          <span className="hud-label log-tag">PREV LOG:</span>
+          <span className="log-value">W{lastSession.week}D{lastSession.sessionNumber} // {ratingLabel[lastSession.rating].toUpperCase()}</span>
+        </div>
+      )}
+    </header>
   );
 }
 
@@ -164,27 +207,13 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <aside
-        aria-label="Current goal"
-        className="industrial-card goal-card"
-      >
-        Current Goal: {currentGoal}
-        <div className="goal-card-text">
-          Progress: {progress.sessionCount}/{SESSIONS_PER_WEEK} sessions to level up
-        </div>
-        {lastSession ? (
-          <div className="last-session-text">
-            Last session: Week {lastSession.week}, Day {lastSession.sessionNumber} - {ratingLabel[lastSession.rating]}
-          </div>
-        ) : null}
-      </aside>
-
-      <ConsistencyRing score={consistencyScore} />
-
-      <section className="angular-glass-card mission-intel-box">
-        <strong className="intel-mission-header">MISSION INTEL:</strong>
-        {missionIntel}
-      </section>
+      <CommandCenter
+        currentGoal={currentGoal}
+        sessionCount={progress.sessionCount}
+        consistencyScore={consistencyScore}
+        missionIntel={missionIntel}
+        lastSession={lastSession}
+      />
 
       {view === "workout" ? (
         <WorkoutDisplay

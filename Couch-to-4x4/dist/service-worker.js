@@ -1,4 +1,4 @@
-const CACHE_NAME = "couch-to-4x4-v5";
+const CACHE_NAME = "couch-to-4x4-v6";
 const PRECACHE_ASSETS = [
   "/",
   "/index.html",
@@ -15,6 +15,14 @@ const AUDIO_ASSETS = [
   "/audio/cooldown_start.mp3",
   "/audio/workout_complete.mp3",
   "/audio/work_halfway.mp3",
+  "/audio/interval_start_1.mp3",
+  "/audio/interval_start_2.mp3",
+  "/audio/interval_start_3.mp3",
+  "/audio/interval_start_4.mp3",
+  "/audio/pause_confirm.mp3",
+  "/audio/resume_confirm.mp3",
+  "/audio/rest_warning_10.mp3",
+  "/audio/rest_warning_30.mp3",
 ];
 
 self.addEventListener("install", (event) => {

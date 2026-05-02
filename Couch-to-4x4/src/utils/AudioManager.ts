@@ -4,8 +4,9 @@ type WindowWithAudioContext = Window & {
   webkitAudioContext?: typeof AudioContext;
 };
 
-const CUE_ATTACK_SECONDS = 0.02;
-const CUE_RELEASE_SECONDS = 0.08;
+const CUE_ATTACK_SECONDS = 0.05;
+const CUE_RELEASE_SECONDS = 0.1;
+const DUCKING_RAMP_SECONDS = 0.2;
 
 type AudioLoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -27,9 +28,12 @@ class AudioManagerImpl {
   private loadStatus: AudioLoadStatus = 'idle';
   private loadError?: string;
   private statusListeners: ((state: AudioManagerState) => void)[] = [];
+  private coachingQueue: Promise<void> = Promise.resolve();
 
   constructor() {
-    this.loadVolume();
+    if (typeof window !== 'undefined') {
+      this.loadVolume();
+    }
   }
 
   private loadVolume(): void {
@@ -41,7 +45,8 @@ class AudioManagerImpl {
     this.volume = Math.max(0, Math.min(1, value));
     localStorage.setItem(AUDIO_SETTINGS_KEY, String(this.volume));
     if (this.cueGain) {
-      this.cueGain.gain.setTargetAtTime(this.volume, this.getContext().currentTime, 0.1);
+      const context = this.getContext();
+      this.cueGain.gain.setTargetAtTime(this.volume, context.currentTime, 0.1);
     }
   }
 
@@ -79,15 +84,33 @@ class AudioManagerImpl {
     this.silentLoopSource = source;
   }
 
-  public async playCue(url: string): Promise<void> {
+  /**
+   * Preloads a list of audio URLs into the cache.
+   */
+  public async preload(urls: string[]): Promise<void> {
+    await Promise.all(urls.map(url => this.loadBuffer(url).catch(() => undefined)));
+  }
+
+  /**
+   * Plays a coaching cue (voice line) using a serial queue to prevent overlapping.
+   */
+  public async playCoachingCue(url: string, title?: string): Promise<void> {
+    this.coachingQueue = this.coachingQueue.then(async () => {
+      await this.playCue(url, title);
+      // Add a small breather between queued cues
+      return new Promise(resolve => setTimeout(resolve, 200));
+    });
+    return this.coachingQueue;
+  }
+
+  /**
+   * Plays an audio cue immediately.
+   */
+  public async playCue(url: string, title?: string): Promise<void> {
     const context = this.getContext();
     const gain = this.getCueGain();
 
     await this.unlock();
-
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.playbackState = "playing";
-    }
 
     try {
       const buffer = await this.loadBuffer(url);
@@ -100,7 +123,7 @@ class AudioManagerImpl {
       source.connect(sourceGain);
       sourceGain.connect(gain);
 
-      sourceGain.gain.cancelScheduledValues(now);
+      // Smooth envelope to prevent clicks
       sourceGain.gain.setValueAtTime(0, now);
       sourceGain.gain.linearRampToValueAtTime(1, now + CUE_ATTACK_SECONDS);
       sourceGain.gain.setValueAtTime(
@@ -109,15 +132,17 @@ class AudioManagerImpl {
       );
       sourceGain.gain.linearRampToValueAtTime(0, now + cueDuration);
 
-      this.beginCue();
+      this.beginCue(title);
 
-      source.onended = () => {
-        source.disconnect();
-        sourceGain.disconnect();
-        this.endCue();
-      };
-
-      source.start(now);
+      return new Promise((resolve) => {
+        source.onended = () => {
+          source.disconnect();
+          sourceGain.disconnect();
+          this.endCue();
+          resolve();
+        };
+        source.start(now);
+      });
     } catch (error) {
       console.error("Failed to play audio cue:", error);
       this.setLoadStatus('error', error instanceof Error ? error.message : 'Unknown error');
@@ -161,6 +186,7 @@ class AudioManagerImpl {
     }
     
     this.bufferCache.clear();
+    this.coachingQueue = Promise.resolve();
   }
 
   private getContext(): AudioContext {
@@ -223,17 +249,19 @@ class AudioManagerImpl {
     return bufferPromise;
   }
 
-  private beginCue(): void {
+  private beginCue(title?: string): void {
     this.activeCueCount += 1;
-    this.configureMediaSession();
+    this.configureMediaSession(title);
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.playbackState = "playing";
     }
 
-    // Duck the main silent loop volume to 10%
+    // Duck the main silent loop volume smoothly
     if (this.mainGain) {
-      this.mainGain.gain.setTargetAtTime(0.1, this.getContext().currentTime, 0.1);
+      const now = this.getContext().currentTime;
+      this.mainGain.gain.cancelScheduledValues(now);
+      this.mainGain.gain.linearRampToValueAtTime(0.2, now + DUCKING_RAMP_SECONDS);
     }
   }
 
@@ -248,22 +276,27 @@ class AudioManagerImpl {
       navigator.mediaSession.playbackState = "none";
     }
 
-    // Restore the main silent loop volume to 100%
+    // Restore the main silent loop volume smoothly
     if (this.mainGain) {
-      this.mainGain.gain.setTargetAtTime(1.0, this.getContext().currentTime, 0.1);
+      const now = this.getContext().currentTime;
+      this.mainGain.gain.cancelScheduledValues(now);
+      this.mainGain.gain.linearRampToValueAtTime(1.0, now + DUCKING_RAMP_SECONDS);
     }
   }
 
-  private configureMediaSession(): void {
+  private configureMediaSession(title?: string): void {
     if (!("mediaSession" in navigator)) {
       return;
     }
 
     if ("MediaMetadata" in window) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: "Workout cue",
+        title: title || "Workout Cue",
         artist: "Couch to 4x4",
         album: "Norwegian 4x4 HIIT",
+        artwork: [
+          { src: '/icons/icon.svg', sizes: '512x512', type: 'image/svg+xml' }
+        ]
       });
     }
   }

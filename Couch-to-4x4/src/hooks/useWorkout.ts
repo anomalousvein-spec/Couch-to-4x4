@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { createWorkoutEngine, WorkoutPhase, type WorkoutConfig, type WorkoutEngineInstance } from '../workoutEngine';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createWorkoutEngine, type WorkoutConfig, type WorkoutEngineInstance } from '../workoutEngine';
 import { useWakeLock } from './useWakeLock';
 import { useHaptics } from './useHaptics';
 import { useWorkoutAudio } from './useWorkoutAudio';

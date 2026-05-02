@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { WorkoutPhase, type WorkoutState, type WorkoutEngineInstance } from '../workoutEngine';
 import { AudioManager } from '../utils/AudioManager';
 

@@ -49,9 +49,9 @@ class MockAudioContext {
   }
 }
 
-global.AudioContext = MockAudioContext as any;
-global.window.AudioContext = MockAudioContext as any;
-global.fetch = vi.fn(() =>
+globalThis.AudioContext = MockAudioContext as any;
+globalThis.window.AudioContext = MockAudioContext as any;
+globalThis.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
@@ -59,11 +59,11 @@ global.fetch = vi.fn(() =>
 ) as any;
 
 // Mock MediaSession
-(global.navigator as any).mediaSession = {
+(globalThis.navigator as any).mediaSession = {
   metadata: null,
   playbackState: 'none',
 };
-global.MediaMetadata = class {
+globalThis.MediaMetadata = class {
   constructor(public data: any) {}
 } as any;
 
@@ -86,7 +86,7 @@ describe('AudioManager', () => {
   it('should preload buffers', async () => {
     const urls = ['/audio/test1.mp3', '/audio/test2.mp3'];
     await AudioManager.preload(urls);
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('should play a cue and update media session', async () => {

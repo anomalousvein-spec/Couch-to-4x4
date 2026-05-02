@@ -31,8 +31,6 @@ export function useWorkout(config: WorkoutConfig) {
     setTimeout(() => setIsGlitching(false), GLITCH_DURATION_SHORT);
   }, []);
 
-  const handleStart = useCallback(() => engine.start(), [engine]);
-  const handlePause = useCallback(() => engine.pause(), [engine]);
   const handleReset = useCallback(() => {
     engine.reset();
     setCompletionHandled(false);
@@ -96,9 +94,47 @@ export function useWorkout(config: WorkoutConfig) {
       if (cue) {
         void AudioManager.playCue(cue);
       }
+      
+      // Play interval start beep when entering WORK phase
+      if (state.phase === WorkoutPhase.WORK) {
+        void AudioManager.playCue('/audio/interval_start.mp3');
+      }
+      
       lastPhaseRef.current = state.phase;
     }
   }, [state.status, state.phase]);
+
+  // Effect: Rest Period Countdown Warnings
+  useEffect(() => {
+    if (state.status !== 'running') return;
+    if (state.phase !== WorkoutPhase.REST) return;
+
+    const { secondsRemaining } = state;
+
+    if (secondsRemaining === 30) {
+      void AudioManager.playCue('/audio/rest_warning_30.mp3');
+    } else if (secondsRemaining === 10) {
+      void AudioManager.playCue('/audio/rest_warning_10.mp3');
+    }
+  }, [state.status, state.phase, state.secondsRemaining]);
+
+  // Effect: Pause/Resume Confirmation
+  useEffect(() => {
+    if (state.status === 'paused') {
+      void AudioManager.playCue('/audio/pause_confirm.mp3');
+    }
+  }, [state.status]);
+
+  const handlePause = useCallback(() => {
+    engine.pause();
+  }, [engine]);
+  
+  const handleStart = useCallback(() => {
+    engine.start();
+    if (state.status === 'paused') {
+      void AudioManager.playCue('/audio/resume_confirm.mp3');
+    }
+  }, [engine, state.status]);
 
   // Effect: Interval Feedback (Warning & Haptics)
   useEffect(() => {

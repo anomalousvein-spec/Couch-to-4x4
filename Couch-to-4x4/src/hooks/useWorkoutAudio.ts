@@ -71,9 +71,10 @@ export function useWorkoutAudio(engine: WorkoutEngineInstance, state: WorkoutSta
       }
 
       // Play interval start beep immediately when entering WORK phase
+      // Queue it after the phase announcement to prevent overlapping
       if (state.phase === WorkoutPhase.WORK) {
         const intervalNum = Math.min(state.currentInterval, 4);
-        void AudioManager.playCue(`/audio/interval_start_${intervalNum}.mp3`, `Interval ${state.currentInterval}/4`);
+        void AudioManager.playCoachingCue(`/audio/interval_start_${intervalNum}.mp3`, `Interval ${state.currentInterval}/4`);
       }
 
       lastPhaseRef.current = state.phase;

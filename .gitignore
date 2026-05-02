@@ -1,15 +1,1 @@
-```
-# Dependencies
-node_modules/
-
-# Build artifacts
-dist/
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Logs
-*.log
-```
+Nothing should be ignored based on the provided file changes. The modified file 'Couch-to-4x4/src/hooks/useWorkoutAudio.ts' is a source code file that should be tracked in version control. No build artifacts, dependencies, or temporary files are present in the changes.

@@ -97,7 +97,8 @@ export function useWorkout(config: WorkoutConfig) {
       
       // Play interval start beep when entering WORK phase
       if (state.phase === WorkoutPhase.WORK) {
-        void AudioManager.playCue('/audio/interval_start.mp3');
+        const intervalNum = Math.min(state.currentInterval, 4);
+        void AudioManager.playCue(`/audio/interval_start_${intervalNum}.mp3`);
       }
       
       lastPhaseRef.current = state.phase;

@@ -20,8 +20,6 @@ const intensityGuide: Record<WorkoutPhase, { hr: string; rpe: string }> = {
 };
 
 export const Dashboard: React.FC<DashboardProps> = React.memo(({
-  currentWeek,
-  sessionCount,
   phase,
   intervalLabel,
   totalRemaining,
@@ -46,29 +44,6 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
       </div>
 
       <section aria-live="polite" className="dashboard-readout">
-        {currentWeek !== undefined ? (
-          <p className="week-label">
-            WEEK {currentWeek}
-            {sessionCount !== undefined
-              ? ` | ${sessionCount}/3 SESSIONS`
-              : ""}
-          </p>
-        ) : null}
-
-        {sessionCount !== undefined ? (
-          <div
-            aria-label={`${sessionCount} of 3 weekly sessions completed`}
-            className="session-dots"
-          >
-            {[0, 1, 2].map((index) => (
-              <span
-                key={index}
-                className={`session-dot ${index < (sessionCount ?? 0) ? "complete" : ""}`}
-              />
-            ))}
-          </div>
-        ) : null}
-
         <div className="phase-header">
           <p className="phase-label">{phase}</p>
           <div className="intensity-target">
@@ -77,8 +52,16 @@ export const Dashboard: React.FC<DashboardProps> = React.memo(({
           </div>
         </div>
 
-        <p className="interval-label">{intervalLabel}</p>
-        <p className="total-remaining-label">TOTAL REMAINING: {formatTime(totalRemaining)}</p>
+        <div className="workout-meta-grid">
+          <div className="meta-item">
+            <span className="hud-label">INTERVAL</span>
+            <p className="interval-label">{intervalLabel}</p>
+          </div>
+          <div className="meta-item">
+            <span className="hud-label">TIME REMAINING</span>
+            <p className="total-remaining-label">{formatTime(totalRemaining)}</p>
+          </div>
+        </div>
 
         {currentFact && (
           <div className="bio-insight-ticker">
